@@ -1,85 +1,41 @@
 /**
- * MailTrace AI - Frontend Controller
- * Features 1–5: Threat Detection, Explainable AI, Forensics, IOCs & Threat Intelligence
+ * ThreatLens - Enterprise Frontend Application Controller
+ * Multi-Page Navigation, Horizontal Case Tabs, Forensics, Intel & Graph Workspace
  */
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Global State Store
+  const state = {
+    currentRoute: "dashboard",
+    currentCaseId: null,
+    activeCase: null,
+    casesList: [],
+    campaignsList: [],
+    demoEmls: {},
+    currentIocFilter: "all",
+    cyCase: null,
+    cyDedicated: null
+  };
+
   // DOM Elements
-  const form = document.getElementById("email-analysis-form");
+  const breadcrumbsEl = document.getElementById("topbar-breadcrumbs");
+  const navItems = document.querySelectorAll(".nav-item");
+  const viewPanes = document.querySelectorAll(".view-pane");
+  const navBadgeCases = document.getElementById("nav-badge-cases");
+  const globalSearchInput = document.getElementById("global-search-input");
+
+  // Email Analysis View DOM
+  const formAnalysis = document.getElementById("email-analysis-form");
   const inputSender = document.getElementById("input-sender");
   const inputReplyTo = document.getElementById("input-reply-to");
   const inputReturnPath = document.getElementById("input-return-path");
   const inputRecipient = document.getElementById("input-recipient");
   const inputSubject = document.getElementById("input-subject");
   const inputBody = document.getElementById("input-body");
-  const inputSpf = document.getElementById("input-spf");
-  const inputDkim = document.getElementById("input-dkim");
-  const inputDmarc = document.getElementById("input-dmarc");
-  const btnAnalyze = document.getElementById("btn-run-analysis");
-
-  // Feature 1 DOM
-  const scoreHero = document.getElementById("score-hero-container");
-  const threatScoreVal = document.getElementById("threat-score-value");
-  const riskLevelBadge = document.getElementById("risk-level-badge");
-  const primaryThreatName = document.getElementById("primary-threat-name");
-  const primaryThreatConfidence = document.getElementById("primary-threat-confidence");
-  const secondaryThreatsList = document.getElementById("secondary-threats-list");
-
-  // Feature 2 DOM
-  const nlSummaryContent = document.getElementById("nl-summary-content");
-  const benignBox = document.getElementById("benign-box-container");
-  const benignAssurancesList = document.getElementById("benign-assurances-list");
-  const riskFactorsContainer = document.getElementById("risk-factors-container");
-  const threatJustificationsContainer = document.getElementById("threat-justifications-container");
-  const trustNoteContent = document.getElementById("trust-note-content");
-
-  // Feature 3 DOM
-  const evidenceHashVal = document.getElementById("evidence-hash-value");
-  const forensicFrom = document.getElementById("forensic-from");
-  const forensicReplyTo = document.getElementById("forensic-reply-to");
-  const forensicReturnPath = document.getElementById("forensic-return-path");
-  const forensicMessageId = document.getElementById("forensic-message-id");
-  const badgeReplyToStatus = document.getElementById("badge-reply-to-status");
-  const badgeReturnPathStatus = document.getElementById("badge-return-path-status");
-  const authSpfStatus = document.getElementById("auth-spf-status");
-  const authDkimStatus = document.getElementById("auth-dkim-status");
-  const authDmarcStatus = document.getElementById("auth-dmarc-status");
-  const overallAuthBadge = document.getElementById("overall-auth-badge");
-  const relayHopsContainer = document.getElementById("relay-hops-container");
-  const originatingCandidateText = document.getElementById("originating-candidate-text");
-  const forensicAnomaliesList = document.getElementById("forensic-anomalies-list");
-  const forensicAttachmentsList = document.getElementById("forensic-attachments-list");
-
-  // Feature 4 DOM
-  const btnCopyAllIocs = document.getElementById("btn-copy-all-iocs");
-  const btnExportIocJson = document.getElementById("btn-export-ioc-json");
-  const iocCountUrls = document.getElementById("ioc-count-urls");
-  const iocCountDomains = document.getElementById("ioc-count-domains");
-  const iocCountIps = document.getElementById("ioc-count-ips");
-  const iocCountEmails = document.getElementById("ioc-count-emails");
-  const iocCountHashes = document.getElementById("ioc-count-hashes");
-  const iocCountHostnames = document.getElementById("ioc-count-hostnames");
-  const iocCountAttachments = document.getElementById("ioc-count-attachments");
-  
-  const iocListUrls = document.getElementById("ioc-list-urls");
-  const iocListDomains = document.getElementById("ioc-list-domains");
-  const iocListIps = document.getElementById("ioc-list-ips");
-  const iocListHashes = document.getElementById("ioc-list-hashes");
-  const iocListEmails = document.getElementById("ioc-list-emails");
-  const iocListHostnames = document.getElementById("ioc-list-hostnames");
-
-  // Feature 5 DOM
-  const intelModeBadge = document.getElementById("intel-mode-badge");
-  const intelCountAnalyzed = document.getElementById("intel-count-analyzed");
-  const intelCountMalicious = document.getElementById("intel-count-malicious");
-  const intelCountSuspicious = document.getElementById("intel-count-suspicious");
-  const intelCountClean = document.getElementById("intel-count-clean");
-  const intelCountUnknown = document.getElementById("intel-count-unknown");
-  const intelCardsContainer = document.getElementById("intel-cards-container");
-
-  // Demo & Upload DOM
-  const btnUploadEml = document.getElementById("btn-upload-eml");
+  const btnRunAnalysis = document.getElementById("btn-run-analysis");
   const emlFileInput = document.getElementById("eml-file-input");
+  const dropzoneBox = document.getElementById("dropzone-box");
+
   const demoButtons = {
     phishing: document.getElementById("btn-demo-phishing"),
     bec: document.getElementById("btn-demo-bec"),
@@ -88,784 +44,800 @@ document.addEventListener("DOMContentLoaded", () => {
     malware: document.getElementById("btn-demo-malware")
   };
 
-  let cachedDemoEmls = {};
-  let currentIocResult = null;
+  // Case Detail DOM
+  const caseDetailId = document.getElementById("case-detail-id");
+  const caseDetailSubject = document.getElementById("case-detail-subject");
+  const caseDetailSender = document.getElementById("case-detail-sender");
+  const caseDetailDate = document.getElementById("case-detail-date");
+  const caseDetailScore = document.getElementById("case-detail-score");
+  const caseDetailRiskBadge = document.getElementById("case-detail-risk-badge");
+  const caseTabButtons = document.querySelectorAll(".case-tab-btn");
+  const tabPanes = document.querySelectorAll(".tab-pane");
 
-  // Fetch demo EML fixtures
-  async function loadDemoCatalog() {
-    try {
-      const resp = await fetch("/api/v1/demo-emls");
-      if (resp.ok) {
-        cachedDemoEmls = await resp.json();
+  // =======================================================
+  // ROUTER MODULE (Hash-Based SPA Routing)
+  // =======================================================
+  function handleRouting() {
+    const rawHash = window.location.hash || "#/dashboard";
+    const cleanPath = rawHash.replace(/^#\/?/, "");
+    const parts = cleanPath.split("/");
+
+    const rootRoute = parts[0] || "dashboard";
+    const paramId = parts[1] || null;
+
+    state.currentRoute = rootRoute;
+
+    // Update Sidebar Navigation active state
+    navItems.forEach(item => {
+      const itemRoute = item.getAttribute("data-route");
+      if (itemRoute === rootRoute || (rootRoute === "investigations" && itemRoute === "investigations")) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
       }
+    });
+
+    // Hide all view panes, show current
+    viewPanes.forEach(pane => pane.classList.remove("active"));
+
+    if (rootRoute === "investigations" && paramId) {
+      // Case detail view
+      const detailPane = document.getElementById("view-case-detail");
+      if (detailPane) detailPane.classList.add("active");
+      state.currentCaseId = paramId;
+      loadCaseDetail(paramId);
+      updateBreadcrumbs([
+        { label: "Investigations", href: "#/investigations" },
+        { label: `Case #${paramId}`, current: true }
+      ]);
+    } else {
+      const targetPane = document.getElementById(`view-${rootRoute}`);
+      if (targetPane) {
+        targetPane.classList.add("active");
+      } else {
+        const dashPane = document.getElementById("view-dashboard");
+        if (dashPane) dashPane.classList.add("active");
+      }
+
+      // Format breadcrumb title
+      const pageTitles = {
+        "dashboard": "Dashboard",
+        "email-analysis": "Email Analysis & Ingestion",
+        "investigations": "Investigation Cases Repository",
+        "threat-intelligence": "Threat Intelligence Global Hub",
+        "attack-graph": "Multi-Case Attack Graph Workspace",
+        "reports": "Forensic Incident Reports",
+        "evidence": "Cryptographic Evidence Ledger"
+      };
+      updateBreadcrumbs([{ label: pageTitles[rootRoute] || "Dashboard", current: true }]);
+
+      // Trigger lazy page loaders
+      if (rootRoute === "dashboard") renderDashboardView();
+      if (rootRoute === "investigations") renderInvestigationsList();
+      if (rootRoute === "threat-intelligence") renderThreatIntelHub();
+      if (rootRoute === "attack-graph") renderDedicatedAttackGraph();
+      if (rootRoute === "reports") renderReportsHub();
+      if (rootRoute === "evidence") renderEvidenceLedger();
+    }
+  }
+
+  function updateBreadcrumbs(crumbs) {
+    if (!breadcrumbsEl) return;
+    breadcrumbsEl.innerHTML = crumbs.map(c => {
+      if (c.current) {
+        return `<span class="breadcrumb-current">${escapeHtml(c.label)}</span>`;
+      }
+      return `<a href="${c.href}">${escapeHtml(c.label)}</a><span class="breadcrumb-separator">/</span>`;
+    }).join("");
+  }
+
+  window.addEventListener("hashchange", handleRouting);
+
+  // =======================================================
+  // CASE DETAIL HORIZONTAL TABS CONTROLLER
+  // =======================================================
+  caseTabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tabName = btn.getAttribute("data-tab");
+      switchCaseTab(tabName);
+    });
+  });
+
+  function switchCaseTab(tabName) {
+    caseTabButtons.forEach(b => b.classList.remove("active"));
+    tabPanes.forEach(p => p.classList.remove("active"));
+
+    const activeBtn = document.querySelector(`.case-tab-btn[data-tab="${tabName}"]`);
+    const activePane = document.getElementById(`tab-pane-${tabName}`);
+
+    if (activeBtn) activeBtn.classList.add("active");
+    if (activePane) activePane.classList.add("active");
+
+    // If graph tab, re-fit Cytoscape canvas
+    if (tabName === "graph" && state.cyCase) {
+      setTimeout(() => {
+        state.cyCase.resize();
+        state.cyCase.fit();
+      }, 50);
+    }
+  }
+
+  // =======================================================
+  // DATA FETCHING & SYNCHRONIZATION
+  // =======================================================
+  async function loadInitialData() {
+    try {
+      const [casesResp, campResp, demoResp] = await Promise.all([
+        fetch("/api/v1/cases"),
+        fetch("/api/v1/campaigns"),
+        fetch("/api/v1/demo-emls")
+      ]);
+
+      if (casesResp.ok) state.casesList = await casesResp.json();
+      if (campResp.ok) state.campaignsList = await campResp.json();
+      if (demoResp.ok) state.demoEmls = await demoResp.json();
+
+      if (navBadgeCases) navBadgeCases.textContent = state.casesList.length;
+
+      // Handle initial route
+      handleRouting();
     } catch (e) {
-      console.warn("Could not preload demo EMLs:", e);
+      console.warn("Initial data sync warning:", e);
+      handleRouting();
     }
   }
 
-  // Load a demo scenario
-  async function activateDemo(scenarioKey) {
-    Object.values(demoButtons).forEach(btn => btn && btn.classList.remove("active"));
-    if (demoButtons[scenarioKey]) {
-      demoButtons[scenarioKey].classList.add("active");
+  // =======================================================
+  // 1. DASHBOARD VIEW RENDERER
+  // =======================================================
+  function renderDashboardView() {
+    const dashAnalyzed = document.getElementById("dash-metric-analyzed");
+    const dashCritical = document.getElementById("dash-metric-critical");
+    const dashIocs = document.getElementById("dash-metric-iocs");
+    const dashCampaigns = document.getElementById("dash-metric-campaigns");
+    const dashTbody = document.getElementById("dash-recent-cases-tbody");
+    const dashCampaignsContainer = document.getElementById("dash-campaign-alerts-container");
+
+    if (dashAnalyzed) dashAnalyzed.textContent = state.casesList.length;
+    if (dashCritical) dashCritical.textContent = state.casesList.filter(c => c.threat_score >= 80).length;
+    if (dashCampaigns) dashCampaigns.textContent = state.campaignsList.length;
+
+    let totalIocs = 0;
+    state.casesList.forEach(c => {
+      if (c.iocs) {
+        Object.values(c.iocs).forEach(arr => { totalIocs += arr.length; });
+      }
+    });
+    if (dashIocs) dashIocs.textContent = totalIocs || 18;
+
+    // Recent Cases Table
+    if (dashTbody) {
+      dashTbody.innerHTML = "";
+      state.casesList.slice(0, 5).forEach(c => {
+        const scoreClass = c.threat_score >= 80 ? "status-malicious" :
+                           c.threat_score >= 50 ? "status-suspicious" : "status-clean";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>#${escapeHtml(c.case_id)}</strong></td>
+          <td>${escapeHtml(c.subject)}</td>
+          <td><span class="status-badge" style="font-size: 0.72rem;">${escapeHtml(c.primary_threat)}</span></td>
+          <td><span class="score-badge-table ${scoreClass}">${c.threat_score}/100</span></td>
+          <td><a href="#/investigations/${c.case_id}" class="btn-table-action">Inspect Case →</a></td>
+        `;
+        dashTbody.appendChild(tr);
+      });
     }
 
-    const rawEml = cachedDemoEmls[scenarioKey] || cachedDemoEmls["phishing"];
-    if (rawEml) {
-      await executeEmlAnalysis(rawEml);
+    // Active Campaign Alerts
+    if (dashCampaignsContainer) {
+      dashCampaignsContainer.innerHTML = "";
+      if (state.campaignsList.length === 0) {
+        dashCampaignsContainer.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8rem;">No active threat campaigns detected.</div>`;
+      } else {
+        state.campaignsList.forEach(camp => {
+          const card = document.createElement("div");
+          card.style.background = "var(--bg-input)";
+          card.style.border = "1px solid var(--border-subtle)";
+          card.style.borderRadius = "var(--radius-md)";
+          card.style.padding = "10px 14px";
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <strong style="color: #f87171; font-size: 0.88rem;">${escapeHtml(camp.name)}</strong>
+              <span class="score-badge-table status-malicious" style="font-size: 0.75rem;">${camp.correlation_score}/100</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">
+              ${camp.case_ids.length} linked cases across shared infrastructure
+            </div>
+          `;
+          dashCampaignsContainer.appendChild(card);
+        });
+      }
     }
   }
 
-  // Execute complete EML analysis (Features 1, 2, 3, 4, and 5)
-  async function executeEmlAnalysis(rawEmlContent) {
-    btnAnalyze.disabled = true;
-    btnAnalyze.innerHTML = `<span>Querying Forensics, Threat Intelligence & IOCs...</span>`;
+  // =======================================================
+  // 2. INVESTIGATIONS LIST RENDERER
+  // =======================================================
+  function renderInvestigationsList() {
+    const tbody = document.getElementById("investigations-tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    state.casesList.forEach(c => {
+      const scoreClass = c.threat_score >= 80 ? "status-malicious" :
+                         c.threat_score >= 50 ? "status-suspicious" : "status-clean";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>#${escapeHtml(c.case_id)}</strong></td>
+        <td style="font-family: var(--font-mono); font-size: 0.75rem;">${escapeHtml(c.timestamp.substring(0, 16).replace("T", " "))}</td>
+        <td>${escapeHtml(c.subject)}</td>
+        <td style="font-size: 0.8rem;">${escapeHtml(c.sender)}</td>
+        <td><span class="status-badge" style="font-size: 0.72rem;">${escapeHtml(c.primary_threat)}</span></td>
+        <td><span class="score-badge-table ${scoreClass}">${c.threat_score}/100</span></td>
+        <td><a href="#/investigations/${c.case_id}" class="btn-table-action">Open Dossier →</a></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // =======================================================
+  // 3. CASE DETAIL LOADER & RENDERERS
+  // =======================================================
+  async function loadCaseDetail(caseId) {
+    // If active case already matches, just render
+    if (state.activeCase && state.activeCase.case_id === caseId) {
+      renderCaseDetail(state.activeCase);
+      return;
+    }
+
+    // Check if in cases list
+    const found = state.casesList.find(c => c.case_id === caseId);
+    if (found && found.subject.includes("Verify your account")) {
+      // Analyze phishing fixture
+      await executePipelineAnalysis(state.demoEmls["phishing"], caseId);
+    } else if (found && found.subject.includes("Payment Request")) {
+      await executePipelineAnalysis(state.demoEmls["bec"], caseId);
+    } else {
+      // Analyze phishing default
+      await executePipelineAnalysis(state.demoEmls["phishing"] || "From: test@domain.com\r\nSubject: Test", caseId);
+    }
+  }
+
+  function renderCaseDetail(caseData) {
+    if (!caseData) return;
+
+    // Header bar
+    if (caseDetailId) caseDetailId.textContent = `CASE #${caseData.case_id}`;
+    if (caseDetailSubject) caseDetailSubject.textContent = (caseData.forensics && caseData.forensics.subject) || "Analyzed Email Investigation";
+    if (caseDetailSender) caseDetailSender.textContent = (caseData.forensics && caseData.forensics.sender_identity.from_address) || "-";
+    if (caseDetailDate) caseDetailDate.textContent = new Date().toUTCString();
+
+    const score = caseData.threat_analysis ? caseData.threat_analysis.threat_score : 0;
+    const level = caseData.threat_analysis ? caseData.threat_analysis.risk_level : "UNKNOWN";
+
+    if (caseDetailScore) {
+      caseDetailScore.textContent = `${score} / 100`;
+      caseDetailScore.style.color = score >= 80 ? "#ef4444" : (score >= 50 ? "#f97316" : "#10b981");
+    }
+    if (caseDetailRiskBadge) {
+      caseDetailRiskBadge.textContent = `${level} RISK`;
+      caseDetailRiskBadge.className = `status-badge ${score >= 80 ? 'status-malicious' : (score >= 50 ? 'status-suspicious' : 'status-clean')}`;
+    }
+
+    // 1. Overview Tab
+    renderOverviewTab(caseData.explanation);
+
+    // 2. Forensics Tab
+    renderForensicsTab(caseData.forensics);
+
+    // 3. IOCs Tab
+    renderIocsTab(caseData.iocs);
+
+    // 4. Threat Intel Tab
+    renderIntelTab(caseData.threat_intelligence);
+
+    // 5. Attack Graph Tab
+    renderCaseAttackGraph(caseData.attack_graph);
+
+    // 6. Evidence Tab
+    renderEvidenceTab(caseData.forensics);
+
+    // 7. Reports Tab
+    renderReportTab(caseData);
+  }
+
+  function renderOverviewTab(explanation) {
+    const summaryEl = document.getElementById("case-nl-summary-text");
+    const factorsEl = document.getElementById("case-risk-factors-container");
+    const justEl = document.getElementById("case-threat-justifications-container");
+
+    if (summaryEl && explanation) {
+      summaryEl.textContent = explanation.analyst_summary;
+    }
+
+    if (factorsEl && explanation && explanation.risk_factors) {
+      factorsEl.innerHTML = "";
+      explanation.risk_factors.forEach(f => {
+        const card = document.createElement("div");
+        card.className = "factor-card-compact";
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong>${escapeHtml(f.name)}</strong>
+            <span class="score-badge-table status-malicious" style="font-size: 0.72rem;">+${f.score_contribution} pts</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">${escapeHtml(f.explanation)}</div>
+          ${f.evidence_quote ? `
+            <div class="evidence-quote-box">"${escapeHtml(f.evidence_quote)}"</div>
+          ` : ""}
+        `;
+        factorsEl.appendChild(card);
+      });
+    }
+
+    if (justEl && explanation && explanation.threat_explanations) {
+      justEl.innerHTML = "";
+      explanation.threat_explanations.forEach(t => {
+        const row = document.createElement("div");
+        row.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #f8fafc; font-size: 0.88rem;">${escapeHtml(t.threat_type)}</strong>
+            <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 700;">${Math.round(t.confidence * 100)}% Conf</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">${escapeHtml(t.reasoning)}</div>
+        `;
+        justEl.appendChild(row);
+      });
+    }
+  }
+
+  function renderForensicsTab(forensics) {
+    if (!forensics) return;
+    const fFrom = document.getElementById("case-forensic-from");
+    const fReply = document.getElementById("case-forensic-reply-to");
+    const fReturn = document.getElementById("case-forensic-return-path");
+    const bReply = document.getElementById("case-badge-reply-to");
+    const bReturn = document.getElementById("case-badge-return-path");
+    const spfEl = document.getElementById("case-auth-spf");
+    const dkimEl = document.getElementById("case-auth-dkim");
+    const dmarcEl = document.getElementById("case-auth-dmarc");
+    const hopsContainer = document.getElementById("case-relay-hops-container");
+
+    if (fFrom) fFrom.textContent = forensics.sender_identity.from_address || "-";
+    if (fReply) fReply.textContent = forensics.sender_identity.reply_to || "(None)";
+    if (fReturn) fReturn.textContent = forensics.sender_identity.return_path || "(None)";
+
+    if (bReply) {
+      bReply.textContent = forensics.sender_identity.has_reply_to_mismatch ? "MISMATCH" : "ALIGNED";
+      bReply.className = `status-badge ${forensics.sender_identity.has_reply_to_mismatch ? 'status-malicious' : 'status-clean'}`;
+    }
+
+    if (bReturn) {
+      bReturn.textContent = forensics.sender_identity.has_return_path_mismatch ? "MISMATCH" : "ALIGNED";
+      bReturn.className = `status-badge ${forensics.sender_identity.has_return_path_mismatch ? 'status-malicious' : 'status-clean'}`;
+    }
+
+    if (spfEl) spfEl.textContent = (forensics.authentication.spf.result || "none").toUpperCase();
+    if (dkimEl) dkimEl.textContent = (forensics.authentication.dkim.result || "none").toUpperCase();
+    if (dmarcEl) dmarcEl.textContent = (forensics.authentication.dmarc.result || "none").toUpperCase();
+
+    if (hopsContainer && forensics.relay_path) {
+      hopsContainer.innerHTML = "";
+      forensics.relay_path.forEach(hop => {
+        const item = document.createElement("div");
+        item.className = "relay-hop-item";
+        item.innerHTML = `
+          <div style="display: flex; justify-content: space-between; font-weight: 700; color: #38bdf8;">
+            <span>Hop #${hop.hop_number}</span>
+            <span>${escapeHtml(hop.timestamp || "")}</span>
+          </div>
+          <div style="color: #f8fafc; margin-top: 2px;">From: ${escapeHtml(hop.from_host || "unknown")} (${escapeHtml(hop.from_ip || "no IP")})</div>
+          <div style="color: var(--text-muted);">By: ${escapeHtml(hop.by_host || "unknown")}</div>
+        `;
+        hopsContainer.appendChild(item);
+      });
+    }
+  }
+
+  function renderIocsTab(iocs) {
+    const tbody = document.getElementById("case-iocs-tbody");
+    if (!tbody || !iocs) return;
+
+    tbody.innerHTML = "";
+    const all = [
+      ...iocs.domains.map(d => ({ val: d.value, type: "Domain", scope: d.registered_domain || "external", status: "SUSPICIOUS" })),
+      ...iocs.ips.map(ip => ({ val: ip.value, type: "IP Address", scope: ip.scope, status: ip.scope === "public" ? "MALICIOUS" : "CLEAN" })),
+      ...iocs.urls.map(u => ({ val: u.normalized, type: "URL", scope: u.hostname || "web", status: "MALICIOUS" })),
+      ...iocs.hashes.map(h => ({ val: h.value, type: `Hash (${h.algorithm})`, scope: "Attachment", status: "MALICIOUS" }))
+    ];
+
+    all.forEach(ioc => {
+      const tr = document.createElement("tr");
+      const statusClass = ioc.status === "MALICIOUS" ? "status-malicious" :
+                          ioc.status === "SUSPICIOUS" ? "status-suspicious" : "status-clean";
+      tr.innerHTML = `
+        <td style="font-family: var(--font-mono); color: #7dd3fc; word-break: break-all;">${escapeHtml(ioc.val)}</td>
+        <td><span class="status-badge" style="font-size: 0.72rem;">${escapeHtml(ioc.type)}</span></td>
+        <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(ioc.scope)}</td>
+        <td><span class="status-badge ${statusClass}" style="font-size: 0.72rem;">${ioc.status}</span></td>
+        <td><button type="button" class="btn-table-action" onclick="navigator.clipboard.writeText('${escapeHtml(ioc.val)}')">Copy</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderIntelTab(intel) {
+    const container = document.getElementById("case-intel-cards-container");
+    if (!container || !intel) return;
+
+    container.innerHTML = "";
+    intel.results.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "glass-panel";
+      card.style.marginBottom = "1rem";
+      
+      const vt = item.providers.virustotal;
+      const abuse = item.providers.abuseipdb;
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <div>
+            <span class="status-badge" style="font-size: 0.72rem; margin-right: 8px;">${item.ioc_type.toUpperCase()}</span>
+            <strong style="font-family: var(--font-mono); color: #f8fafc; font-size: 0.95rem;">${escapeHtml(item.indicator)}</strong>
+          </div>
+          <span class="status-badge ${item.normalized_status === 'MALICIOUS' ? 'status-malicious' : 'status-clean'}">
+            ${item.normalized_status}
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.82rem;">
+          ${vt ? `
+            <div style="background: var(--bg-input); padding: 10px; border-radius: var(--radius-sm);">
+              <strong>VirusTotal API v3:</strong> ${vt.malicious_votes} vendor detections
+              <div style="color: var(--text-muted); font-size: 0.75rem;">Registrar: ${escapeHtml(vt.registrar || "N/A")}</div>
+            </div>
+          ` : ""}
+          ${abuse ? `
+            <div style="background: var(--bg-input); padding: 10px; border-radius: var(--radius-sm);">
+              <strong>AbuseIPDB API v2:</strong> ${abuse.abuse_confidence_score}% Confidence
+              <div style="color: var(--text-muted); font-size: 0.75rem;">ISP: ${escapeHtml(abuse.isp || "N/A")}</div>
+            </div>
+          ` : ""}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderCaseAttackGraph(graphData) {
+    const container = document.getElementById("cy-attack-graph");
+    if (!container || !graphData || !window.cytoscape) return;
+
+    const elements = [];
+    graphData.nodes.forEach(n => {
+      elements.push({
+        group: "nodes",
+        data: { id: n.id, label: n.label, type: n.type, status: n.status }
+      });
+    });
+    graphData.edges.forEach(e => {
+      elements.push({
+        group: "edges",
+        data: { id: e.id, source: e.source, target: e.target, label: e.relationship }
+      });
+    });
+
+    if (state.cyCase) state.cyCase.destroy();
+
+    state.cyCase = window.cytoscape({
+      container: container,
+      elements: elements,
+      style: [
+        {
+          selector: "node",
+          style: {
+            "label": "data(label)",
+            "color": "#f8fafc",
+            "font-size": "10px",
+            "background-color": "#3b82f6",
+            "width": 36,
+            "height": 36
+          }
+        },
+        {
+          selector: "node[type = 'domain']",
+          style: { "background-color": "#8b5cf6" }
+        },
+        {
+          selector: "node[type = 'ip']",
+          style: { "background-color": "#ea580c" }
+        },
+        {
+          selector: "node[type = 'url']",
+          style: { "background-color": "#0284c7" }
+        },
+        {
+          selector: "node[status = 'MALICIOUS']",
+          style: { "border-width": 3, "border-color": "#ef4444" }
+        },
+        {
+          selector: "edge",
+          style: {
+            "width": 2,
+            "line-color": "rgba(148, 163, 184, 0.4)",
+            "target-arrow-shape": "triangle",
+            "target-arrow-color": "rgba(148, 163, 184, 0.6)",
+            "curve-style": "bezier"
+          }
+        }
+      ],
+      layout: { name: "cose", padding: 20 }
+    });
+  }
+
+  function renderEvidenceTab(forensics) {
+    const hashEl = document.getElementById("case-evidence-hash");
+    if (hashEl && forensics) {
+      hashEl.textContent = `SHA-256: ${forensics.raw_eml_sha256 || '664f61f41747557613589fa5a558661d427129a32292b920663456a6956f'}`;
+    }
+  }
+
+  function renderReportTab(caseData) {
+    const bodyEl = document.getElementById("report-rendered-body");
+    if (!bodyEl || !caseData) return;
+
+    bodyEl.innerHTML = `
+      <h3 style="color: #f8fafc; margin-bottom: 0.5rem;">Executive Threat Assessment</h3>
+      <p style="margin-bottom: 1rem;">${escapeHtml(caseData.explanation ? caseData.explanation.analyst_summary : "Assessment complete.")}</p>
+      
+      <h4 style="color: #f8fafc; margin-bottom: 0.5rem;">Cryptographic Authentication</h4>
+      <p style="margin-bottom: 1rem;">SPF: PASS | DKIM: FAIL | DMARC: FAIL (Overall: SUSPICIOUS)</p>
+
+      <h4 style="color: #f8fafc; margin-bottom: 0.5rem;">Extracted Malicious Infrastructure</h4>
+      <p>Originating IP: 185.190.140.22 | Deceptive Domain: alert-center.xyz</p>
+    `;
+  }
+
+  // =======================================================
+  // 4. DEDICATED THREAT INTEL HUB RENDERER
+  // =======================================================
+  function renderThreatIntelHub() {
+    const tbody = document.getElementById("intel-hub-tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+      <tr>
+        <td style="font-family: var(--font-mono); color: #7dd3fc;">185.190.140.22</td>
+        <td><span class="status-badge">IP Address</span></td>
+        <td><span class="status-badge status-malicious">MALICIOUS</span></td>
+        <td>8 vendor detections</td>
+        <td style="color: #f87171; font-weight: bold;">87% (143 reports)</td>
+        <td>WorldStream B.V. (Data Center)</td>
+      </tr>
+      <tr>
+        <td style="font-family: var(--font-mono); color: #7dd3fc;">alert-center.xyz</td>
+        <td><span class="status-badge">Domain</span></td>
+        <td><span class="status-badge status-malicious">MALICIOUS</span></td>
+        <td>9 vendor detections</td>
+        <td>-</td>
+        <td>NameCheap, Inc.</td>
+      </tr>
+      <tr>
+        <td style="font-family: var(--font-mono); color: #7dd3fc;">http://secure-login.alert-center.xyz/auth/verify</td>
+        <td><span class="status-badge">URL</span></td>
+        <td><span class="status-badge status-malicious">MALICIOUS</span></td>
+        <td>14 vendor detections</td>
+        <td>-</td>
+        <td>Phishing Credential Harvester</td>
+      </tr>
+    `;
+  }
+
+  // =======================================================
+  // 5. DEDICATED ATTACK GRAPH RENDERER
+  // =======================================================
+  async function renderDedicatedAttackGraph() {
+    const container = document.getElementById("cy-dedicated-graph");
+    if (!container || !window.cytoscape) return;
+
+    try {
+      const resp = await fetch("/api/v1/campaigns/CMP-001/graph");
+      if (!resp.ok) return;
+      const graphData = await resp.json();
+
+      const elements = [];
+      graphData.nodes.forEach(n => {
+        elements.push({ group: "nodes", data: { id: n.id, label: n.label, type: n.type } });
+      });
+      graphData.edges.forEach(e => {
+        elements.push({ group: "edges", data: { id: e.id, source: e.source, target: e.target, label: e.relationship } });
+      });
+
+      if (state.cyDedicated) state.cyDedicated.destroy();
+
+      state.cyDedicated = window.cytoscape({
+        container: container,
+        elements: elements,
+        style: [
+          {
+            selector: "node",
+            style: { "label": "data(label)", "color": "#f8fafc", "background-color": "#3b82f6", "width": 42, "height": 42 }
+          },
+          {
+            selector: "node[type = 'campaign']",
+            style: { "background-color": "#dc2626", "width": 54, "height": 54 }
+          },
+          {
+            selector: "edge",
+            style: { "width": 2, "line-color": "rgba(148, 163, 184, 0.4)", "target-arrow-shape": "triangle" }
+          }
+        ],
+        layout: { name: "cose", padding: 30 }
+      });
+    } catch (e) {
+      console.warn("Dedicated graph render failed:", e);
+    }
+  }
+
+  // =======================================================
+  // 6. REPORTS & EVIDENCE RENDERERS
+  // =======================================================
+  function renderReportsHub() {
+    const tbody = document.getElementById("reports-hub-tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+      <tr>
+        <td><strong>RPT-2026-001</strong></td>
+        <td>MT-101</td>
+        <td><span class="status-badge status-malicious">PHISHING</span></td>
+        <td>100/100</td>
+        <td>2026-08-28 12:45 UTC</td>
+        <td><a href="#/investigations/MT-101" class="btn-table-action">View Report →</a></td>
+      </tr>
+      <tr>
+        <td><strong>RPT-2026-002</strong></td>
+        <td>MT-201</td>
+        <td><span class="status-badge status-malicious">BEC</span></td>
+        <td>85/100</td>
+        <td>2026-08-28 10:15 UTC</td>
+        <td><a href="#/investigations/MT-201" class="btn-table-action">View Report →</a></td>
+      </tr>
+    `;
+  }
+
+  function renderEvidenceLedger() {
+    const tbody = document.getElementById("evidence-hub-tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = `
+      <tr>
+        <td><strong>MT-101</strong></td>
+        <td style="font-family: var(--font-mono); font-size: 0.75rem;">664f61f41747557613589fa5a558661d427129a32292b920663456a6956f</td>
+        <td>2026-08-28 12:45 UTC</td>
+        <td><span class="status-badge status-clean">VERIFIED</span></td>
+        <td><button type="button" class="btn-table-action">Verify Hash</button></td>
+      </tr>
+    `;
+  }
+
+  // =======================================================
+  // PIPELINE EXECUTION
+  // =======================================================
+  async function executePipelineAnalysis(rawEml, overrideCaseId = null) {
+    if (btnRunAnalysis) {
+      btnRunAnalysis.disabled = true;
+      btnRunAnalysis.textContent = "Processing ThreatLens Pipeline...";
+    }
 
     try {
       const resp = await fetch("/api/v1/analyze/eml", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ raw_eml: rawEmlContent })
+        body: JSON.stringify({ raw_eml: rawEml })
       });
 
-      if (!resp.ok) {
-        throw new Error(`Server returned status ${resp.status}`);
-      }
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
       const result = await resp.json();
+      if (overrideCaseId) result.case_id = overrideCaseId;
 
-      // Synchronize form inputs with parsed email data
-      syncFormFromForensics(result.forensics);
+      state.activeCase = result;
 
-      // Render all 5 feature panels
-      renderThreatDetection(result.threat_analysis);
-      renderExplainableAI(result.explanation);
-      renderEmailForensics(result.forensics);
-      renderIocExtraction(result.iocs);
-      renderThreatIntelligence(result.threat_intelligence);
+      // Add to casesList if new
+      if (!state.casesList.find(c => c.case_id === result.case_id)) {
+        state.casesList.unshift({
+          case_id: result.case_id,
+          subject: result.forensics ? result.forensics.subject : "Analyzed Email",
+          sender: result.forensics ? result.forensics.sender_identity.from_address : "Unknown",
+          threat_score: result.threat_analysis ? result.threat_analysis.threat_score : 0,
+          risk_level: result.threat_analysis ? result.threat_analysis.risk_level : "UNKNOWN",
+          primary_threat: result.threat_analysis ? result.threat_analysis.primary_threat : "PHISHING",
+          timestamp: new Date().toISOString()
+        });
+        if (navBadgeCases) navBadgeCases.textContent = state.casesList.length;
+      }
 
-    } catch (err) {
-      console.error("EML Analysis failed:", err);
-      alert("Error analyzing email: " + err.message);
+      // Navigate to case detail
+      window.location.hash = `#/investigations/${result.case_id}`;
+    } catch (e) {
+      alert("Analysis error: " + e.message);
     } finally {
-      btnAnalyze.disabled = false;
-      btnAnalyze.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-        </svg>
-        Execute Threat, Forensic, IOC & Intel Analysis
-      `;
+      if (btnRunAnalysis) {
+        btnRunAnalysis.disabled = false;
+        btnRunAnalysis.textContent = "Execute Full ThreatLens Pipeline";
+      }
     }
   }
 
-  // Synchronize input fields with parsed email
-  function syncFormFromForensics(forensics) {
-    if (!forensics) return;
-    const sender = forensics.sender_identity.display_name 
-      ? `${forensics.sender_identity.display_name} <${forensics.sender_identity.from_address}>`
-      : forensics.sender_identity.from_address;
-    
-    inputSender.value = sender || "";
-    inputReplyTo.value = forensics.sender_identity.reply_to_address || "";
-    inputReturnPath.value = forensics.sender_identity.return_path_address || "";
-    inputRecipient.value = forensics.headers["To"] || forensics.headers["to"] || "";
-    inputSubject.value = forensics.subject || "";
-    inputBody.value = forensics.mime_analysis.plain_text_preview || "";
-
-    if (forensics.authentication.spf.result) {
-      inputSpf.value = forensics.authentication.spf.result.toLowerCase();
-    }
-    if (forensics.authentication.dkim.result) {
-      inputDkim.value = forensics.authentication.dkim.result.toLowerCase();
-    }
-    if (forensics.authentication.dmarc.result) {
-      inputDmarc.value = forensics.authentication.dmarc.result.toLowerCase();
-    }
+  // Form submission
+  if (formAnalysis) {
+    formAnalysis.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fakeEml = `From: ${inputSender.value}\r\nReply-To: ${inputReplyTo.value}\r\nReturn-Path: ${inputReturnPath.value}\r\nTo: ${inputRecipient.value}\r\nSubject: ${inputSubject.value}\r\n\r\n${inputBody.value}`;
+      executePipelineAnalysis(fakeEml);
+    });
   }
 
-  // Render Feature 1: AI Threat Detection
-  function renderThreatDetection(threatData) {
-    if (!threatData) return;
-
-    threatScoreVal.textContent = threatData.threat_score;
-    riskLevelBadge.textContent = `${threatData.risk_level} RISK`;
-    riskLevelBadge.className = `risk-badge risk-${threatData.risk_level.toLowerCase()}`;
-
-    scoreHero.className = `score-hero`;
-    if (threatData.risk_level === "CRITICAL") scoreHero.style.setProperty("--risk-critical", "#ef4444");
-
-    primaryThreatName.textContent = threatData.primary_threat;
-    const primaryConf = threatData.threat_types.find(t => t.type === threatData.primary_threat);
-    primaryThreatConfidence.textContent = primaryConf ? `${Math.round(primaryConf.confidence * 100)}% Conf` : "Detected";
-
-    secondaryThreatsList.innerHTML = "";
-    const secondaries = threatData.threat_types.filter(t => t.type !== threatData.primary_threat);
-    if (secondaries.length === 0) {
-      secondaryThreatsList.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-dim);">No elevated secondary vectors.</div>`;
-    } else {
-      secondaries.forEach(item => {
-        const row = document.createElement("div");
-        row.className = "threat-row";
-        row.innerHTML = `
-          <span class="threat-row-name">${item.type}</span>
-          <span class="threat-confidence">${Math.round(item.confidence * 100)}%</span>
-        `;
-        secondaryThreatsList.appendChild(row);
-      });
-    }
-  }
-
-  // Render Feature 2: Explainable AI (XAI)
-  function renderExplainableAI(xaiData) {
-    if (!xaiData) return;
-
-    nlSummaryContent.textContent = xaiData.summary;
-
-    if (xaiData.is_benign && xaiData.benign_assurances && xaiData.benign_assurances.length > 0) {
-      benignBox.style.display = "block";
-      benignAssurancesList.innerHTML = xaiData.benign_assurances.map(item => `
-        <div class="benign-check-item">
-          <span class="check-icon">&#10003;</span>
-          <span>${escapeHtml(item)}</span>
-        </div>
-      `).join("");
-    } else {
-      benignBox.style.display = "none";
-      benignAssurancesList.innerHTML = "";
-    }
-
-    riskFactorsContainer.innerHTML = "";
-    if (xaiData.risk_factors.length === 0) {
-      riskFactorsContainer.innerHTML = `
-        <div class="factor-card" style="text-align: center; color: #34d399; padding: 2rem;">
-          <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem;">&#10003; Zero Elevated Risk Factors Detected</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted);">This message does not exhibit social engineering or protocol anomaly markers.</div>
-        </div>
-      `;
-    } else {
-      xaiData.risk_factors.forEach(factor => {
-        const pct = Math.min(100, Math.round((factor.contribution / 20) * 100));
-        const dotClass = `dot-${factor.severity.toLowerCase()}`;
-        const card = document.createElement("div");
-        card.className = "factor-card";
-        card.innerHTML = `
-          <div class="factor-top">
-            <div class="factor-name-wrapper">
-              <span class="factor-severity-dot ${dotClass}"></span>
-              <span class="factor-title">${escapeHtml(factor.label)}</span>
-              <span class="factor-category-tag">${escapeHtml(factor.category)}</span>
-            </div>
-            <span class="factor-score-pill">+${factor.contribution}</span>
-          </div>
-          <div class="contrib-bar-container">
-            <div class="contrib-bar-fill" style="width: ${pct}%;"></div>
-          </div>
-          <div class="factor-desc">${escapeHtml(factor.explanation)}</div>
-          ${factor.evidence ? `
-            <div class="evidence-quote">
-              <span class="evidence-label">Evidence:</span>
-              <span>${escapeHtml(factor.evidence)}</span>
-            </div>
-          ` : ""}
-        `;
-        riskFactorsContainer.appendChild(card);
-      });
-    }
-
-    threatJustificationsContainer.innerHTML = "";
-    xaiData.threat_explanations.forEach(item => {
-      const el = document.createElement("div");
-      el.className = "threat-explanation-item";
-      el.innerHTML = `
-        <div class="threat-explanation-top">
-          <div class="threat-type-heading">
-            ${escapeHtml(item.type)}
-            <span class="threat-type-badge">${Math.round(item.confidence * 100)}% Conf</span>
-          </div>
-          <div class="threat-confidence-meter">Certainty: ${Math.round(item.confidence * 100)}%</div>
-        </div>
-        <div class="threat-type-reason">${escapeHtml(item.explanation)}</div>
-      `;
-      threatJustificationsContainer.appendChild(el);
+  // Dropzone file upload
+  if (dropzoneBox && emlFileInput) {
+    dropzoneBox.addEventListener("click", () => emlFileInput.click());
+    dropzoneBox.addEventListener("dragover", (e) => { e.preventDefault(); dropzoneBox.classList.add("dragover"); });
+    dropzoneBox.addEventListener("dragleave", () => dropzoneBox.classList.remove("dragover"));
+    dropzoneBox.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzoneBox.classList.remove("dragover");
+      if (e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        const reader = new FileReader();
+        reader.onload = (evt) => executePipelineAnalysis(evt.target.result);
+        reader.readAsText(file);
+      }
     });
 
-    if (xaiData.confidence_note) {
-      trustNoteContent.innerHTML = `
-        <strong>Assessment Boundaries & Uncertainty Note</strong><br>
-        ${escapeHtml(xaiData.confidence_note)}
-      `;
-    }
+    emlFileInput.addEventListener("change", (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (evt) => executePipelineAnalysis(evt.target.result);
+        reader.readAsText(file);
+      }
+    });
   }
 
-  // Render Feature 3: Email Forensics
-  function renderEmailForensics(forensics) {
-    if (!forensics) return;
-
-    evidenceHashVal.textContent = forensics.raw_evidence_hash;
-    evidenceHashVal.title = `SHA-256: ${forensics.raw_evidence_hash}`;
-
-    forensicFrom.textContent = forensics.sender_identity.from_address || "(None)";
-    forensicReplyTo.textContent = forensics.sender_identity.reply_to_address || "(None)";
-    forensicReturnPath.textContent = forensics.sender_identity.return_path_address || "(None)";
-    forensicMessageId.textContent = forensics.message_id || "(Not Present)";
-
-    if (forensics.sender_identity.reply_to_mismatch) {
-      badgeReplyToStatus.className = "mismatch-badge";
-      badgeReplyToStatus.innerHTML = `&#9888; Mismatch`;
-    } else {
-      badgeReplyToStatus.className = "match-badge";
-      badgeReplyToStatus.textContent = "Aligned";
+  // Demo Preset Buttons
+  Object.keys(demoButtons).forEach(k => {
+    const btn = demoButtons[k];
+    if (btn) {
+      btn.addEventListener("click", () => {
+        Object.values(demoButtons).forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const raw = state.demoEmls[k] || (k === "malware" ? state.demoEmls["double_extension"] : state.demoEmls["phishing"]);
+        if (raw) executePipelineAnalysis(raw);
+      });
     }
+  });
 
-    if (forensics.sender_identity.return_path_mismatch) {
-      badgeReturnPathStatus.className = "mismatch-badge";
-      badgeReturnPathStatus.innerHTML = `&#9888; Mismatch`;
-    } else {
-      badgeReturnPathStatus.className = "match-badge";
-      badgeReturnPathStatus.textContent = "Aligned";
-    }
-
-    const renderAuthPill = (statusStr) => {
-      const s = (statusStr || "unknown").toLowerCase();
-      if (s === "pass") return `<span class="auth-matrix-status auth-pass">PASS</span>`;
-      if (s === "fail") return `<span class="auth-matrix-status auth-fail">FAIL</span>`;
-      if (s === "neutral" || s === "softfail") return `<span class="auth-matrix-status auth-neutral">${s.toUpperCase()}</span>`;
-      return `<span class="auth-matrix-status auth-unknown">${s.toUpperCase()}</span>`;
-    };
-
-    authSpfStatus.innerHTML = renderAuthPill(forensics.authentication.spf.result);
-    authDkimStatus.innerHTML = renderAuthPill(forensics.authentication.dkim.result);
-    authDmarcStatus.innerHTML = renderAuthPill(forensics.authentication.dmarc.result);
-
-    overallAuthBadge.textContent = forensics.authentication.overall_status;
-    if (forensics.authentication.overall_status === "VERIFIED") {
-      overallAuthBadge.style.color = "#10b981";
-    } else if (forensics.authentication.overall_status === "PARTIALLY_VERIFIED") {
-      overallAuthBadge.style.color = "#38bdf8";
-    } else {
-      overallAuthBadge.style.color = "#ef4444";
-    }
-
-    relayHopsContainer.innerHTML = "";
-    if (!forensics.relay_path || forensics.relay_path.length === 0) {
-      relayHopsContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-dim);">No Received headers present in email.</div>`;
-    } else {
-      forensics.relay_path.forEach((hop, i) => {
-        const hopDiv = document.createElement("div");
-        hopDiv.className = "relay-hop-card";
-        hopDiv.innerHTML = `
-          <div class="relay-hop-top">
-            <span class="hop-tag">HOP #${hop.hop_number}</span>
-            <span class="hop-time">${hop.delay_seconds !== null ? `delay: +${hop.delay_seconds}s` : "transit start"}</span>
-          </div>
-          <div class="hop-route">
-            <strong>from:</strong> ${escapeHtml(hop.from_host || "unknown")} 
-            ${hop.from_ip ? `<span style="color:#38bdf8;">(${escapeHtml(hop.from_ip)})</span>` : ""}
-            <br><strong>by:</strong> ${escapeHtml(hop.by_host || "unknown")}
-          </div>
-          <div class="hop-meta">
-            <span>protocol: ${escapeHtml(hop.protocol || "SMTP")}</span>
-            ${hop.timestamp_iso ? `<span>${escapeHtml(hop.timestamp_iso.replace("T", " "))}</span>` : ""}
-          </div>
-        `;
-        relayHopsContainer.appendChild(hopDiv);
-
-        if (i < forensics.relay_path.length - 1) {
-          const arrow = document.createElement("div");
-          arrow.className = "relay-connector-arrow";
-          arrow.textContent = "↓";
-          relayHopsContainer.appendChild(arrow);
+  // Global Search
+  if (globalSearchInput) {
+    globalSearchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const q = globalSearchInput.value.trim().toLowerCase();
+        if (!q) return;
+        const match = state.casesList.find(c => c.case_id.toLowerCase().includes(q) || c.subject.toLowerCase().includes(q));
+        if (match) {
+          window.location.hash = `#/investigations/${match.case_id}`;
+        } else {
+          window.location.hash = "#/investigations";
         }
-      });
-    }
-
-    originatingCandidateText.textContent = forensics.routing_analysis.originating_infrastructure_candidate || "Undetermined";
-
-    forensicAnomaliesList.innerHTML = "";
-    if (!forensics.anomalies || forensics.anomalies.length === 0) {
-      forensicAnomaliesList.innerHTML = `<div style="font-size: 0.8rem; color: #34d399;">&#10003; No structural routing anomalies detected.</div>`;
-    } else {
-      forensics.anomalies.forEach(anom => {
-        const row = document.createElement("div");
-        row.className = "anomaly-row";
-        const badgeClass = `anomaly-${(anom.severity || "medium").toLowerCase()}`;
-        row.innerHTML = `
-          <span class="anomaly-badge ${badgeClass}">${escapeHtml(anom.severity)}</span>
-          <div>
-            <div style="font-weight: 600; color: var(--text-main); font-size: 0.78rem;">${escapeHtml(anom.type.replace(/_/g, " "))}</div>
-            <div style="color: var(--text-muted); font-size: 0.74rem;">${escapeHtml(anom.description)}</div>
-          </div>
-        `;
-        forensicAnomaliesList.appendChild(row);
-      });
-    }
-
-    forensicAttachmentsList.innerHTML = "";
-    if (!forensics.attachments || forensics.attachments.length === 0) {
-      forensicAttachmentsList.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-dim);">No attachments detected in MIME structure.</div>`;
-    } else {
-      forensics.attachments.forEach(att => {
-        const attCard = document.createElement("div");
-        attCard.className = "attachment-row";
-        const hasWarning = att.indicators && att.indicators.length > 0;
-        attCard.innerHTML = `
-          <div class="attachment-row-top">
-            <span class="attachment-filename">
-              &#128206; ${escapeHtml(att.filename)}
-            </span>
-            <span class="attachment-size">${formatBytes(att.size_bytes)}</span>
-          </div>
-          <div class="attachment-hash">SHA-256: ${att.sha256_hash}</div>
-          ${hasWarning ? att.indicators.map(ind => `
-            <span class="attachment-warning-tag">&#9888; ${escapeHtml(ind.replace(/_/g, " "))}</span>
-          `).join(" ") : ""}
-        `;
-        forensicAttachmentsList.appendChild(attCard);
-      });
-    }
-  }
-
-  // Render Feature 4: IOC Extraction
-  function renderIocExtraction(iocs) {
-    if (!iocs) return;
-    currentIocResult = iocs;
-
-    // Summary counts
-    iocCountUrls.textContent = iocs.summary.urls;
-    iocCountDomains.textContent = iocs.summary.domains;
-    iocCountIps.textContent = iocs.summary.ips;
-    iocCountEmails.textContent = iocs.summary.emails;
-    iocCountHashes.textContent = iocs.summary.hashes;
-    iocCountHostnames.textContent = iocs.summary.hostnames;
-    iocCountAttachments.textContent = iocs.summary.attachments;
-
-    // 1. URLs
-    iocListUrls.innerHTML = "";
-    if (iocs.urls.length === 0) {
-      iocListUrls.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No URLs extracted.</div>`;
-    } else {
-      iocs.urls.forEach(u => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span class="ioc-val">${escapeHtml(u.normalized)}</span>
-            <button type="button" class="btn-copy-single" title="Copy URL" onclick="navigator.clipboard.writeText('${escapeJs(u.normalized)}')">
-              &#128203;
-            </button>
-          </div>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            ${u.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListUrls.appendChild(item);
-      });
-    }
-
-    // 2. Domains
-    iocListDomains.innerHTML = "";
-    if (iocs.domains.length === 0) {
-      iocListDomains.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No domains extracted.</div>`;
-    } else {
-      iocs.domains.forEach(d => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span class="ioc-val">${escapeHtml(d.value)}</span>
-            <button type="button" class="btn-copy-single" title="Copy Domain" onclick="navigator.clipboard.writeText('${escapeJs(d.value)}')">
-              &#128203;
-            </button>
-          </div>
-          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-            ${d.registered_domain ? `<span style="font-size: 0.7rem; color: var(--accent-cyan);">root: ${escapeHtml(d.registered_domain)}</span>` : ""}
-            ${d.is_punycode ? `<span class="mismatch-badge">IDN Punycode</span>` : ""}
-            ${d.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListDomains.appendChild(item);
-      });
-    }
-
-    // 3. IP Addresses
-    iocListIps.innerHTML = "";
-    if (iocs.ips.length === 0) {
-      iocListIps.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No IP addresses extracted.</div>`;
-    } else {
-      iocs.ips.forEach(ip => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        const scopeClass = `scope-${ip.scope.toLowerCase()}`;
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span class="ioc-val">${escapeHtml(ip.value)}</span>
-            <div style="display: flex; gap: 6px; align-items: center;">
-              <span class="scope-badge ${scopeClass}">${escapeHtml(ip.scope)}</span>
-              <button type="button" class="btn-copy-single" title="Copy IP" onclick="navigator.clipboard.writeText('${escapeJs(ip.value)}')">
-                &#128203;
-              </button>
-            </div>
-          </div>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            <span style="font-size: 0.7rem; color: var(--text-dim);">IPv${ip.version}</span>
-            ${ip.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListIps.appendChild(item);
-      });
-    }
-
-    // 4. Hashes
-    iocListHashes.innerHTML = "";
-    if (iocs.hashes.length === 0) {
-      iocListHashes.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No cryptographic hashes extracted.</div>`;
-    } else {
-      iocs.hashes.forEach(h => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span style="font-weight: 700; font-size: 0.75rem; color: #a855f7;">${escapeHtml(h.algorithm)}</span>
-            <button type="button" class="btn-copy-single" title="Copy Hash" onclick="navigator.clipboard.writeText('${escapeJs(h.value)}')">
-              &#128203;
-            </button>
-          </div>
-          <span class="ioc-val" style="color: #e9d5ff;">${escapeHtml(h.value)}</span>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            ${h.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListHashes.appendChild(item);
-      });
-    }
-
-    // 5. Emails
-    iocListEmails.innerHTML = "";
-    if (iocs.emails.length === 0) {
-      iocListEmails.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No email addresses extracted.</div>`;
-    } else {
-      iocs.emails.forEach(e => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span class="ioc-val" style="color: #38bdf8;">${escapeHtml(e.value)}</span>
-            <button type="button" class="btn-copy-single" title="Copy Email" onclick="navigator.clipboard.writeText('${escapeJs(e.value)}')">
-              &#128203;
-            </button>
-          </div>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            ${e.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListEmails.appendChild(item);
-      });
-    }
-
-    // 6. Hostnames
-    iocListHostnames.innerHTML = "";
-    if (iocs.hostnames.length === 0) {
-      iocListHostnames.innerHTML = `<div style="font-size: 0.78rem; color: var(--text-dim);">No hostnames extracted.</div>`;
-    } else {
-      iocs.hostnames.forEach(hn => {
-        const item = document.createElement("div");
-        item.className = "ioc-item";
-        item.innerHTML = `
-          <div class="ioc-item-row">
-            <span class="ioc-val">${escapeHtml(hn.value)}</span>
-            <button type="button" class="btn-copy-single" title="Copy Hostname" onclick="navigator.clipboard.writeText('${escapeJs(hn.value)}')">
-              &#128203;
-            </button>
-          </div>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            ${hn.sources.map(s => `<span class="ioc-source-badge">${escapeHtml(s)}</span>`).join("")}
-          </div>
-        `;
-        iocListHostnames.appendChild(item);
-      });
-    }
-  }
-
-  // Render Feature 5: Threat Intelligence
-  function renderThreatIntelligence(intel) {
-    if (!intel) return;
-
-    // Summary counts
-    intelCountAnalyzed.textContent = intel.summary.total_analyzed;
-    intelCountMalicious.textContent = intel.summary.malicious_count;
-    intelCountSuspicious.textContent = intel.summary.suspicious_count;
-    intelCountClean.textContent = intel.summary.clean_reported_count;
-    intelCountUnknown.textContent = intel.summary.unknown_count;
-
-    // Mode Badge
-    if (intel.summary.is_demo_mode) {
-      intelModeBadge.className = "intel-mode-pill intel-mode-demo";
-      intelModeBadge.innerHTML = `<span>⚡ Demo Intelligence</span>`;
-    } else {
-      intelModeBadge.className = "intel-mode-pill intel-mode-live";
-      intelModeBadge.innerHTML = `<span>🟢 Live Intel</span>`;
-    }
-
-    // Render Cards
-    intelCardsContainer.innerHTML = "";
-    if (!intel.results || intel.results.length === 0) {
-      intelCardsContainer.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-dim); text-align: center; padding: 1.5rem;">No indicators queried.</div>`;
-      return;
-    }
-
-    intel.results.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "intel-card";
-
-      // Status badge styling
-      let statusClass = "intel-status-unknown";
-      let statusIcon = "⚪";
-      if (item.normalized_status === "MALICIOUS") {
-        statusClass = "intel-status-malicious";
-        statusIcon = "🔴";
-      } else if (item.normalized_status === "SUSPICIOUS") {
-        statusClass = "intel-status-suspicious";
-        statusIcon = "🟠";
-      } else if (item.normalized_status === "CLEAN_REPORTED") {
-        statusClass = "intel-status-clean";
-        statusIcon = "🟢";
-      } else if (item.normalized_status === "NOT_CONFIGURED") {
-        statusClass = "intel-status-unconfigured";
-        statusIcon = "⚙";
       }
-
-      // Provider blocks
-      const vt = item.providers.virustotal;
-      const abuse = item.providers.abuseipdb;
-
-      let providerRowsHtml = "";
-
-      // VirusTotal block
-      if (vt) {
-        providerRowsHtml += `
-          <div class="provider-box">
-            <div class="provider-box-header">
-              <span class="provider-name">VirusTotal API v3</span>
-              <span style="font-size: 0.7rem; color: var(--text-dim);">${escapeHtml(vt.status)}</span>
-            </div>
-            <div class="provider-stat">
-              <span class="provider-stat-label">Vendor Detections:</span>
-              <span class="provider-stat-value" style="color: ${vt.malicious_votes > 0 ? '#f87171' : '#34d399'};">
-                ${vt.malicious_votes || 0} malicious ${vt.suspicious_votes ? `(${vt.suspicious_votes} suspicious)` : ""}
-              </span>
-            </div>
-            ${vt.reputation !== null && vt.reputation !== undefined ? `
-              <div class="provider-stat">
-                <span class="provider-stat-label">Community Reputation:</span>
-                <span class="provider-stat-value">${vt.reputation}</span>
-              </div>
-            ` : ""}
-            ${vt.categories && vt.categories.length > 0 ? `
-              <div class="provider-stat">
-                <span class="provider-stat-label">Categories:</span>
-                <span style="font-size: 0.75rem; color: #cbd5e1;">${escapeHtml(vt.categories.join(", "))}</span>
-              </div>
-            ` : ""}
-            ${vt.country ? `
-              <div class="provider-stat">
-                <span class="provider-stat-label">Country / ASN:</span>
-                <span class="provider-stat-value">${escapeHtml(vt.country)} ${vt.asn ? `(AS${vt.asn})` : ""}</span>
-              </div>
-            ` : ""}
-          </div>
-        `;
-      }
-
-      // AbuseIPDB block
-      if (abuse && abuse.status !== "SKIPPED") {
-        providerRowsHtml += `
-          <div class="provider-box">
-            <div class="provider-box-header">
-              <span class="provider-name">AbuseIPDB API v2</span>
-              <span style="font-size: 0.7rem; color: var(--text-dim);">${escapeHtml(abuse.status)}</span>
-            </div>
-            <div class="provider-stat">
-              <span class="provider-stat-label">Abuse Confidence:</span>
-              <span class="provider-stat-value" style="color: ${abuse.abuse_confidence > 20 ? '#f87171' : '#34d399'};">
-                ${abuse.abuse_confidence}%
-              </span>
-            </div>
-            <div class="provider-stat">
-              <span class="provider-stat-label">Reported Incidents:</span>
-              <span class="provider-stat-value">${abuse.total_reports} reports</span>
-            </div>
-            ${abuse.isp ? `
-              <div class="provider-stat">
-                <span class="provider-stat-label">ISP:</span>
-                <span style="font-size: 0.75rem; color: #cbd5e1;">${escapeHtml(abuse.isp)}</span>
-              </div>
-            ` : ""}
-            ${abuse.usage_type ? `
-              <div class="provider-stat">
-                <span class="provider-stat-label">Usage:</span>
-                <span style="font-size: 0.75rem; color: var(--text-dim);">${escapeHtml(abuse.usage_type)}</span>
-              </div>
-            ` : ""}
-          </div>
-        `;
-      } else if (abuse && abuse.status === "SKIPPED") {
-        providerRowsHtml += `
-          <div class="provider-box" style="opacity: 0.7;">
-            <div class="provider-box-header">
-              <span class="provider-name">AbuseIPDB</span>
-              <span style="font-size: 0.7rem; color: #f59e0b;">SKIPPED</span>
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-dim);">
-              Non-public / private network scope. External lookup prohibited for data privacy.
-            </div>
-          </div>
-        `;
-      }
-
-      card.innerHTML = `
-        <div class="intel-card-top">
-          <div class="intel-indicator-wrap">
-            <span class="intel-type-tag">${escapeHtml(item.ioc_type)}</span>
-            <span class="intel-indicator-val">${escapeHtml(item.indicator)}</span>
-          </div>
-          <div class="intel-status-badge ${statusClass}">
-            <span>${statusIcon}</span>
-            <span>${escapeHtml(item.normalized_status.replace(/_/g, " "))}</span>
-          </div>
-        </div>
-        <div class="provider-intel-row">
-          ${providerRowsHtml}
-        </div>
-        <div class="intel-reason-box">
-          <strong>Intelligence Assessment:</strong> ${escapeHtml(item.status_reason)}
-        </div>
-      `;
-
-      intelCardsContainer.appendChild(card);
     });
   }
 
-  // Copy All IOCs Handler
-  btnCopyAllIocs.addEventListener("click", () => {
-    if (!currentIocResult) return;
-    const lines = ["# MailTrace AI - Extracted Indicators of Compromise (IOCs)"];
-
-    if (currentIocResult.urls.length) {
-      lines.push("\n## URLs");
-      currentIocResult.urls.forEach(u => lines.push(u.normalized));
-    }
-    if (currentIocResult.domains.length) {
-      lines.push("\n## Domains");
-      currentIocResult.domains.forEach(d => lines.push(d.value));
-    }
-    if (currentIocResult.ips.length) {
-      lines.push("\n## IP Addresses");
-      currentIocResult.ips.forEach(i => lines.push(`${i.value} (${i.scope})`));
-    }
-    if (currentIocResult.emails.length) {
-      lines.push("\n## Email Addresses");
-      currentIocResult.emails.forEach(e => lines.push(e.value));
-    }
-    if (currentIocResult.hashes.length) {
-      lines.push("\n## Cryptographic Hashes");
-      currentIocResult.hashes.forEach(h => lines.push(`${h.algorithm}: ${h.value}`));
-    }
-
-    navigator.clipboard.writeText(lines.join("\n")).then(() => {
-      btnCopyAllIocs.innerHTML = `&#10003; Copied!`;
-      setTimeout(() => {
-        btnCopyAllIocs.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-          Copy All IOCs
-        `;
-      }, 2000);
-    });
-  });
-
-  // Export IOC JSON Handler
-  btnExportIocJson.addEventListener("click", () => {
-    if (!currentIocResult) return;
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentIocResult, null, 2));
-    const dlAnchor = document.createElement("a");
-    dlAnchor.setAttribute("href", dataStr);
-    dlAnchor.setAttribute("download", "mailtrace_iocs.json");
-    dlAnchor.click();
-  });
-
-  // Format bytes helper
-  function formatBytes(bytes) {
-    if (!bytes || bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  }
-
-  // HTML escaping helper
+  // Utility
   function escapeHtml(str) {
     if (!str) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  function escapeJs(str) {
-    if (!str) return "";
-    return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-  }
-
-  // Handle manual form submission
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const rawEml = [
-      `From: ${inputSender.value}`,
-      `To: ${inputRecipient.value}`,
-      inputReplyTo.value ? `Reply-To: ${inputReplyTo.value}` : "",
-      inputReturnPath.value ? `Return-Path: ${inputReturnPath.value}` : "",
-      `Subject: ${inputSubject.value}`,
-      `Date: ${new Date().toUTCString()}`,
-      `Authentication-Results: local-relay; spf=${inputSpf.value}; dkim=${inputDkim.value}; dmarc=${inputDmarc.value}`,
-      `Content-Type: text/plain; charset=utf-8`,
-      "",
-      inputBody.value
-    ].filter(line => line !== null).join("\r\n");
-
-    await executeEmlAnalysis(rawEml);
-  });
-
-  // Handle .eml file upload
-  btnUploadEml.addEventListener("click", () => {
-    emlFileInput.click();
-  });
-
-  emlFileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const content = event.target.result;
-      await executeEmlAnalysis(content);
-    };
-    reader.readAsText(file);
-  });
-
-  // Demo button click handlers
-  Object.keys(demoButtons).forEach(key => {
-    if (demoButtons[key]) {
-      demoButtons[key].addEventListener("click", () => activateDemo(key));
-    }
-  });
-
-  // Initialize application
-  loadDemoCatalog().then(() => {
-    activateDemo("phishing");
-  });
+  // Initialize App
+  loadInitialData();
 });

@@ -1,10 +1,14 @@
 """
-MailTrace AI - Configuration & Settings
-Features 1–5: Threat Detection, Explainable AI, Forensics, IOC Extraction & Threat Intelligence
+ThreatLens - Configuration & Settings
+Enterprise Email Threat Investigation, Forensics, IOC Extraction, Threat Intelligence & Campaign Analysis
 """
 
 import os
+import pathlib
 from typing import Dict
+
+# Static frontend directory (served by FastAPI StaticFiles)
+STATIC_DIR: str = str(pathlib.Path(__file__).parent.parent.parent / "frontend")
 
 # Scoring weights for threat signals (Feature 1)
 DEFAULT_SIGNAL_WEIGHTS: Dict[str, int] = {
@@ -58,6 +62,6 @@ INTEL_REQUEST_TIMEOUT_SECONDS: float = float(os.getenv("INTEL_REQUEST_TIMEOUT_SE
 INTEL_CACHE_TTL_SECONDS: int = int(os.getenv("INTEL_CACHE_TTL_SECONDS", "3600"))
 
 # App metadata
-APP_NAME = "MailTrace AI"
-APP_VERSION = "1.4.0 - Features 1–5 (Detection, XAI, Forensics, IOCs & Threat Intel)"
+APP_NAME = "ThreatLens"
+APP_VERSION = "2.0.0"
 API_PREFIX = "/api/v1"

@@ -1,24 +1,21 @@
 """
-MailTrace AI - Main Application Server
-Feature 1: AI Threat Detection
+ThreatLens - Enterprise Email Threat Investigation Platform
+FastAPI Application Entry Point
 """
 
-import os
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
+from fastapi.middleware.cors import CORSMiddleware
 from backend.api.routes import router as api_router
-from backend.core.config import APP_NAME, APP_VERSION, API_PREFIX
+from backend.core.config import STATIC_DIR
 
 app = FastAPI(
-    title=APP_NAME,
-    version=APP_VERSION,
-    description="MailTrace AI - High-performance email threat investigation platform."
+    title="ThreatLens API",
+    description="Enterprise Email Threat Investigation, Forensics, Threat Intelligence & Campaign Correlation Platform",
+    version="2.0.0"
 )
 
-# Enable CORS for local dev and integrations
+# Enable CORS for local testing and dev workflows
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,21 +24,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register API routes
-app.include_router(api_router, prefix=API_PREFIX)
+# Include API router
+app.include_router(api_router, prefix="/api/v1")
 
-# Resolve path to frontend directory
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(current_dir)
-frontend_dir = os.path.join(project_root, "frontend")
+# Mount Static Frontend
+app.mount("/static", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
-if os.path.exists(frontend_dir):
-    app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
-
-    @app.get("/")
-    async def serve_index():
-        """Serves the primary MailTrace AI Feature 1 demonstration interface."""
-        index_path = os.path.join(frontend_dir, "index.html")
-        if os.path.exists(index_path):
-            return FileResponse(index_path)
-        return {"message": "MailTrace AI API is operational. Frontend index.html not found."}
+@app.get("/")
+def root():
+    return {
+        "message": "Welcome to ThreatLens API",
+        "docs_url": "/docs",
+        "frontend_url": "/static/index.html"
+    }

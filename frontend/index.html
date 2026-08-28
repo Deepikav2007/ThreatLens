@@ -3,664 +3,894 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MailTrace AI - Threat Detection, Explainable AI, Forensics, IOCs & Threat Intelligence</title>
+  <title>ThreatLens - Enterprise Email Threat Investigation & Forensics Platform</title>
   <link rel="stylesheet" href="css/styles.css">
   <!-- Google Fonts: Inter and JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Cytoscape.js Graph Visualization Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
 </head>
 <body>
 
-  <!-- Top App Navigation / Header -->
-  <header class="app-header">
-    <div class="header-container">
-      <div class="brand-wrapper">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="app-shell">
+    
+    <!-- =======================================================
+         SIDEBAR NAVIGATION
+         ======================================================= -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
         <div>
-          <div class="brand-title">MailTrace <span>AI</span></div>
-          <div class="brand-tagline">Email Threat Investigation & Forensic Analysis</div>
+          <div class="sidebar-brand-title">Threat<span>Lens</span></div>
+          <div class="sidebar-brand-sub">SOC Forensic Platform</div>
         </div>
       </div>
 
-      <div class="header-status">
-        <div class="feature-pill">Features 1–5 — Detection, XAI, Forensics, IOCs & Threat Intel</div>
-        <div class="status-pill">
-          <span class="status-dot"></span>
-          <span>Engine Online</span>
-        </div>
-      </div>
-    </div>
-  </header>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Core Modules</div>
+        
+        <a href="#/dashboard" class="nav-item active" data-route="dashboard">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </span>
+          <span class="nav-label">Dashboard</span>
+        </a>
 
-  <!-- Main Content Container -->
-  <main class="main-container">
-
-    <!-- Demo Scenarios & Raw EML Upload Bar -->
-    <div class="demo-bar">
-      <div class="demo-buttons-group">
-        <span class="demo-label">Load Demo:</span>
-        <button type="button" class="demo-btn active" id="btn-demo-phishing">Phishing (Account Suspension)</button>
-        <button type="button" class="demo-btn" id="btn-demo-bec">BEC (Executive Wire Transfer)</button>
-        <button type="button" class="demo-btn" id="btn-demo-impersonation">Spoofing (IT Helpdesk)</button>
-        <button type="button" class="demo-btn" id="btn-demo-benign">Benign (Project Meeting)</button>
-        <button type="button" class="demo-btn" id="btn-demo-malware">Malware (.pdf.exe)</button>
-      </div>
-
-      <div class="eml-upload-wrapper">
-        <input type="file" id="eml-file-input" accept=".eml,message/rfc822,text/plain" style="display: none;">
-        <button type="button" class="eml-upload-btn" id="btn-upload-eml">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          Upload .EML File
-        </button>
-      </div>
-    </div>
-
-    <!-- 2-Column Grid: Analysis Form & Threat Assessment -->
-    <div class="app-grid">
-
-      <!-- Column 1: Email Metadata & Content Form -->
-      <section class="glass-panel">
-        <div class="panel-header">
-          <h2 class="panel-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="#/email-analysis" class="nav-item" data-route="email-analysis">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="4" width="20" height="16" rx="2"></rect>
               <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
             </svg>
-            Email Payload Inspector
-          </h2>
-          <span style="font-size: 0.8rem; color: var(--text-dim);">Input Parameters</span>
-        </div>
+          </span>
+          <span class="nav-label">Email Analysis</span>
+        </a>
 
-        <form id="email-analysis-form">
-          <div class="form-group">
-            <label class="form-label" for="input-sender">From (Sender)</label>
-            <input type="text" id="input-sender" class="form-input" placeholder="Display Name <user@domain.com>" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="input-reply-to">Reply-To</label>
-              <input type="text" id="input-reply-to" class="form-input" placeholder="reply@domain.com">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="input-return-path">Return-Path</label>
-              <input type="text" id="input-return-path" class="form-input" placeholder="bounce@domain.com">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="input-recipient">To (Recipient)</label>
-            <input type="email" id="input-recipient" class="form-input" placeholder="victim@company.com" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="input-subject">Subject Line</label>
-            <input type="text" id="input-subject" class="form-input" placeholder="Important notice..." required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="input-body">Email Body Content</label>
-            <textarea id="input-body" class="form-textarea" placeholder="Paste full email text body here..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Authentication Headers</label>
-            <div class="auth-header-grid">
-              <div>
-                <label class="form-label" style="font-size: 0.75rem;">SPF</label>
-                <select id="input-spf" class="form-select">
-                  <option value="pass">PASS</option>
-                  <option value="fail">FAIL</option>
-                  <option value="softfail">SOFTFAIL</option>
-                  <option value="neutral">NEUTRAL</option>
-                  <option value="none">NONE</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.75rem;">DKIM</label>
-                <select id="input-dkim" class="form-select">
-                  <option value="pass">PASS</option>
-                  <option value="fail">FAIL</option>
-                  <option value="neutral">NEUTRAL</option>
-                  <option value="none">NONE</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.75rem;">DMARC</label>
-                <select id="input-dmarc" class="form-select">
-                  <option value="pass">PASS</option>
-                  <option value="fail">FAIL</option>
-                  <option value="quarantine">QUARANTINE</option>
-                  <option value="reject">REJECT</option>
-                  <option value="none">NONE</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-analyze" id="btn-run-analysis">
+        <a href="#/investigations" class="nav-item" data-route="investigations">
+          <span class="nav-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>
-            Execute Threat, Forensic, IOC & Intel Analysis
-          </button>
-        </form>
-      </section>
+          </span>
+          <span class="nav-label">Investigations</span>
+          <span class="nav-badge" id="nav-badge-cases">6</span>
+        </a>
 
-      <!-- Column 2: Threat Detection Results (Feature 1) -->
-      <section class="glass-panel results-card">
-        <div class="panel-header">
-          <h2 class="panel-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        <div class="nav-section-label">Threat Intelligence</div>
+
+        <a href="#/threat-intelligence" class="nav-item" data-route="threat-intelligence">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            AI Threat Detection Result
-          </h2>
-          <span style="font-size: 0.8rem; color: var(--text-dim);">Engine Assessment</span>
-        </div>
+          </span>
+          <span class="nav-label">Threat Intel Hub</span>
+        </a>
 
-        <!-- Threat Score Hero Metric -->
-        <div class="score-hero" id="score-hero-container">
-          <div class="score-title">Cumulative Threat Score</div>
-          <div class="score-number">
-            <span id="threat-score-value">100</span>
-            <span class="score-total">/ 100</span>
-          </div>
-          <div class="risk-badge risk-critical" id="risk-level-badge">CRITICAL RISK</div>
-        </div>
+        <a href="#/attack-graph" class="nav-item" data-route="attack-graph">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="6" cy="6" r="3"></circle>
+              <circle cx="18" cy="6" r="3"></circle>
+              <circle cx="18" cy="18" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"></line>
+              <line x1="8.5" y1="16.5" x2="15.5" y2="7.5"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Attack Graph</span>
+        </a>
 
-        <!-- Primary Threat Banner -->
-        <div class="threat-classification-box">
-          <div class="section-subtitle">
-            <span>Primary Classification</span>
-            <span style="font-size: 0.7rem; color: var(--text-dim);">Top Attack Category</span>
-          </div>
-          <div class="primary-threat-banner">
-            <div>
-              <div class="primary-threat-name" id="primary-threat-name">PHISHING</div>
-              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Automated multi-vector threat profile</div>
-            </div>
-            <div class="threat-confidence" id="primary-threat-confidence">96% Conf</div>
-          </div>
+        <div class="nav-section-label">Audit & Governance</div>
 
-          <!-- Secondary Threats Breakdown -->
-          <div class="section-subtitle">Secondary Attack Vectors</div>
-          <div class="secondary-threats-list" id="secondary-threats-list">
-            <!-- Dynamic rows inserted via JavaScript -->
-          </div>
-        </div>
-      </section>
+        <a href="#/reports" class="nav-item" data-route="reports">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Forensic Reports</span>
+        </a>
 
-    </div>
+        <a href="#/evidence" class="nav-item" data-route="evidence">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Evidence Ledger</span>
+        </a>
+      </nav>
 
-    <!-- =======================================================
-         FEATURE 5: THREAT INTELLIGENCE PANEL
-         ======================================================= -->
-    <section class="intel-section" id="threat-intelligence-container">
-      <div class="intel-panel">
-        <div class="intel-header">
-          <div>
-            <h2 class="intel-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-              </svg>
-              Threat Intelligence & Provider Correlation
-            </h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
-              Multi-source reputation enrichment via VirusTotal API v3 and AbuseIPDB API v2 with failure isolation
-            </div>
-          </div>
-          <div id="intel-mode-badge" class="intel-mode-pill intel-mode-demo">
-            <span>⚡ Demo Intelligence</span>
-          </div>
-        </div>
-
-        <!-- Intelligence Summary Metrics Bar -->
-        <div class="intel-summary-bar">
-          <div class="intel-summary-pill">
-            <span>Indicators Investigated:</span>
-            <span class="intel-count-badge" id="intel-count-analyzed">0</span>
-          </div>
-          <div class="intel-summary-pill">
-            <span>Confirmed Malicious:</span>
-            <span class="intel-count-badge count-malicious" id="intel-count-malicious">0</span>
-          </div>
-          <div class="intel-summary-pill">
-            <span>Suspicious:</span>
-            <span class="intel-count-badge count-suspicious" id="intel-count-suspicious">0</span>
-          </div>
-          <div class="intel-summary-pill">
-            <span>No Malicious Detections:</span>
-            <span class="intel-count-badge count-clean" id="intel-count-clean">0</span>
-          </div>
-          <div class="intel-summary-pill">
-            <span>Unknown / Skipped:</span>
-            <span class="intel-count-badge count-unknown" id="intel-count-unknown">0</span>
-          </div>
-        </div>
-
-        <!-- Enriched Cards Grid -->
-        <div class="intel-card-grid" id="intel-cards-container">
-          <!-- Dynamically populated enriched intelligence cards -->
-        </div>
-
+      <div class="sidebar-footer">
+        <span>ThreatLens v2.0</span>
+        <span style="color: #10b981; font-weight: 600;">Active</span>
       </div>
-    </section>
+    </aside>
 
     <!-- =======================================================
-         FEATURE 4: IOC EXTRACTION PANEL
+         MAIN CONTENT WRAPPER
          ======================================================= -->
-    <section class="iocs-section" id="ioc-extraction-container">
-      <div class="iocs-panel">
-        <div class="iocs-header">
-          <div>
-            <h2 class="iocs-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="main-wrapper">
+      
+      <!-- Topbar Header -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="breadcrumbs" id="topbar-breadcrumbs">
+            <span class="breadcrumb-current">Dashboard</span>
+          </div>
+        </div>
+
+        <div class="topbar-search-wrap">
+          <svg class="topbar-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" class="topbar-search-input" id="global-search-input" placeholder="Search Case ID, IP, Domain, Hash, or Subject...">
+          <span class="search-shortcut-pill">Ctrl K</span>
+        </div>
+
+        <div class="topbar-right">
+          <div class="engine-status-pill">
+            <span class="status-dot-pulse"></span>
+            <span>Engine Online</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Page Content Views -->
+      <main class="page-content">
+
+        <!-- =======================================================
+             VIEW 1: DASHBOARD
+             ======================================================= -->
+        <div id="view-dashboard" class="view-pane active">
+          
+          <!-- Summary Metrics Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div>
+                <div class="metric-label">Total Emails Analyzed</div>
+                <div class="metric-value" id="dash-metric-analyzed">6</div>
+              </div>
+              <div class="metric-icon-box" style="background: rgba(56, 189, 248, 0.1); color: var(--brand-cyan);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div>
+                <div class="metric-label">Critical Threats</div>
+                <div class="metric-value" style="color: #f87171;" id="dash-metric-critical">4</div>
+              </div>
+              <div class="metric-icon-box" style="background: rgba(239, 68, 68, 0.1); color: #f87171;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div>
+                <div class="metric-label">Suspicious IOCs Flagged</div>
+                <div class="metric-value" style="color: #fb923c;" id="dash-metric-iocs">18</div>
+              </div>
+              <div class="metric-icon-box" style="background: rgba(249, 115, 22, 0.1); color: #fb923c;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div>
+                <div class="metric-label">Active Campaigns</div>
+                <div class="metric-value" style="color: #c084fc;" id="dash-metric-campaigns">2</div>
+              </div>
+              <div class="metric-icon-box" style="background: rgba(168, 85, 247, 0.1); color: #c084fc;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="6" cy="6" r="3"></circle>
+                  <circle cx="18" cy="6" r="3"></circle>
+                  <circle cx="18" cy="18" r="3"></circle>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"></line>
+                  <line x1="8.5" y1="16.5" x2="15.5" y2="7.5"></line>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2-Column Dashboard Body -->
+          <div class="dashboard-2col">
+            
+            <!-- Recent Investigations Table -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                  Recent Investigations
+                </h2>
+                <a href="#/investigations" class="btn-table-action">View All Cases →</a>
+              </div>
+
+              <div class="data-table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Case ID</th>
+                      <th>Subject</th>
+                      <th>Threat</th>
+                      <th>Score</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-recent-cases-tbody">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Campaign Alerts -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title" style="color: #f87171;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                  Active Campaign Alerts
+                </h2>
+                <span class="status-badge status-malicious" style="font-size: 0.7rem;">Correlated</span>
+              </div>
+
+              <div id="dash-campaign-alerts-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Quick Action Row -->
+          <div class="quick-actions-row">
+            <a href="#/email-analysis" class="quick-action-card">
+              <div class="metric-icon-box" style="background: rgba(56, 189, 248, 0.15); color: var(--brand-cyan);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 0.95rem;">Analyze New Email</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Inspect .eml headers, forensics & IOCs</div>
+              </div>
+            </a>
+
+            <a href="#/threat-intelligence" class="quick-action-card">
+              <div class="metric-icon-box" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 0.95rem;">Threat Intel Lookup</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Query VirusTotal & AbuseIPDB</div>
+              </div>
+            </a>
+
+            <a href="#/attack-graph" class="quick-action-card">
+              <div class="metric-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="6" cy="6" r="3"></circle>
+                  <circle cx="18" cy="6" r="3"></circle>
+                  <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"></line>
+                </svg>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 0.95rem;">Attack Graph Explorer</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Explore multi-case infrastructure graph</div>
+              </div>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- =======================================================
+             VIEW 2: EMAIL ANALYSIS
+             ======================================================= -->
+        <div id="view-email-analysis" class="view-pane">
+          
+          <div class="demo-pills-bar">
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Load Demo Preset:</span>
+            <button type="button" class="demo-pill-btn active" id="btn-demo-phishing">Phishing Alert</button>
+            <button type="button" class="demo-pill-btn" id="btn-demo-bec">BEC Wire Transfer</button>
+            <button type="button" class="demo-pill-btn" id="btn-demo-impersonation">Spoofed Helpdesk</button>
+            <button type="button" class="demo-pill-btn" id="btn-demo-benign">Benign Meeting</button>
+            <button type="button" class="demo-pill-btn" id="btn-demo-malware">Malware (.pdf.exe)</button>
+          </div>
+
+          <div class="analysis-layout">
+            
+            <!-- Left: Ingestion & Upload Box -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </svg>
+                  Email Ingestion & Upload
+                </h2>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">RFC 822 / .EML</span>
+              </div>
+
+              <!-- Drag & Drop Zone -->
+              <input type="file" id="eml-file-input" accept=".eml,message/rfc822,text/plain" style="display: none;">
+              <div class="dropzone-box" id="dropzone-box">
+                <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);">Drag & Drop .EML File Here</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">or click to browse local files</div>
+              </div>
+
+              <!-- Form Metadata Override -->
+              <form id="email-analysis-form">
+                <div class="form-group">
+                  <label class="form-label" for="input-sender">From (Sender)</label>
+                  <input type="text" id="input-sender" class="form-input" placeholder="Display Name <sender@domain.com>" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="input-reply-to">Reply-To</label>
+                    <input type="text" id="input-reply-to" class="form-input" placeholder="reply@domain.com">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="input-return-path">Return-Path</label>
+                    <input type="text" id="input-return-path" class="form-input" placeholder="bounce@domain.com">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-recipient">To (Recipient)</label>
+                  <input type="email" id="input-recipient" class="form-input" placeholder="victim@company.com" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-subject">Subject Line</label>
+                  <input type="text" id="input-subject" class="form-input" placeholder="Urgent message subject..." required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-body">Email Body Content</label>
+                  <textarea id="input-body" class="form-textarea" placeholder="Paste raw body text or HTML..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary-action" id="btn-run-analysis">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                  </svg>
+                  Execute Full ThreatLens Pipeline
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: Analysis Capabilities Card -->
+            <div class="glass-panel">
+              <div class="panel-header">
+                <h2 class="panel-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                  </svg>
+                  Pipeline Stages
+                </h2>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.85rem;">
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: #38bdf8; font-weight: 800;">01</span>
+                  <div>
+                    <strong style="color: #f8fafc;">RFC 822 Header & Relay Forensics</strong>
+                    <div style="color: var(--text-muted); font-size: 0.78rem;">Reconstructs SMTP transmission path and validates SPF/DKIM/DMARC.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: #38bdf8; font-weight: 800;">02</span>
+                  <div>
+                    <strong style="color: #f8fafc;">IOC Extraction & Scope Normalization</strong>
+                    <div style="color: var(--text-muted); font-size: 0.78rem;">Extracts domains, URLs, IPs, hashes, and scopes.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: #38bdf8; font-weight: 800;">03</span>
+                  <div>
+                    <strong style="color: #f8fafc;">Multi-Source Threat Intelligence</strong>
+                    <div style="color: var(--text-muted); font-size: 0.78rem;">Queries VirusTotal v3 and AbuseIPDB v2 with TTL caching.</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: flex-start;">
+                  <span style="color: #38bdf8; font-weight: 800;">04</span>
+                  <div>
+                    <strong style="color: #f8fafc;">Attack Graph & Campaign Correlation</strong>
+                    <div style="color: var(--text-muted); font-size: 0.78rem;">Interconnects entities and maps multi-case shared infrastructure.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- =======================================================
+             VIEW 3: INVESTIGATIONS LIST
+             ======================================================= -->
+        <div id="view-investigations" class="view-pane">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  Investigation Cases Repository
+                </h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  All indexed security incident investigations and threat dossiers
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="topbar-search-input" id="cases-filter-search" placeholder="Filter cases..." style="width: 220px;">
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Date / Time</th>
+                    <th>Subject</th>
+                    <th>Sender</th>
+                    <th>Primary Threat</th>
+                    <th>Threat Score</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="investigations-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- =======================================================
+             VIEW 4: CASE DETAIL WORKSPACE (Horizontal Tabs)
+             ======================================================= -->
+        <div id="view-case-detail" class="view-pane">
+          
+          <!-- Case Header Banner -->
+          <div class="case-header-card" id="case-header-card">
+            <div>
+              <span class="case-id-badge" id="case-detail-id">CASE #MT-101</span>
+              <div class="case-subject-title" id="case-detail-subject">Loading investigation...</div>
+              <div class="case-meta-row">
+                <span>Sender: <strong id="case-detail-sender" style="color: var(--text-primary);">-</strong></span>
+                <span>Date: <strong id="case-detail-date" style="color: var(--text-primary);">-</strong></span>
+              </div>
+            </div>
+
+            <div class="case-header-right">
+              <div class="case-score-gauge">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Threat Score</div>
+                <div class="case-score-num" id="case-detail-score" style="color: #f87171;">100 / 100</div>
+              </div>
+              <span class="status-badge status-malicious" id="case-detail-risk-badge" style="font-size: 0.85rem; padding: 6px 14px;">CRITICAL RISK</span>
+            </div>
+          </div>
+
+          <!-- Horizontal Tabs Navigation (ONLY ONE TAB ACTIVE AT A TIME!) -->
+          <nav class="case-tabs-nav">
+            <button type="button" class="case-tab-btn active" data-tab="overview">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              Overview
+            </button>
+
+            <button type="button" class="case-tab-btn" data-tab="forensics">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              Forensics
+            </button>
+
+            <button type="button" class="case-tab-btn" data-tab="iocs">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
                 <rect x="3" y="14" width="7" height="7"></rect>
               </svg>
-              IOC Extraction & Normalized Artifacts
-            </h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
-              Investigation-ready Indicators of Compromise with provenance source tracking and network scope classification
-            </div>
-          </div>
-          <div class="ioc-actions">
-            <button type="button" class="btn-ioc-tool" id="btn-copy-all-iocs">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-              Copy All IOCs
+              IOCs
             </button>
-            <button type="button" class="btn-ioc-tool" id="btn-export-ioc-json">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
+
+            <button type="button" class="case-tab-btn" data-tab="intel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
               </svg>
-              Export IOC JSON
+              Threat Intelligence
             </button>
-          </div>
-        </div>
 
-        <!-- Summary Metrics Bar -->
-        <div class="ioc-summary-bar">
-          <div class="ioc-summary-pill">
-            <span>URLs</span>
-            <span class="ioc-summary-count" id="ioc-count-urls">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>Domains</span>
-            <span class="ioc-summary-count" id="ioc-count-domains">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>IP Addresses</span>
-            <span class="ioc-summary-count" id="ioc-count-ips">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>Email Addresses</span>
-            <span class="ioc-summary-count" id="ioc-count-emails">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>Hashes</span>
-            <span class="ioc-summary-count" id="ioc-count-hashes">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>Hostnames</span>
-            <span class="ioc-summary-count" id="ioc-count-hostnames">0</span>
-          </div>
-          <div class="ioc-summary-pill">
-            <span>Attachments</span>
-            <span class="ioc-summary-count" id="ioc-count-attachments">0</span>
-          </div>
-        </div>
-
-        <!-- Categorized IOC Grid -->
-        <div class="ioc-category-grid">
-
-          <!-- 1. URLs -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
-                URLs
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-urls">
-              <!-- Dynamically populated URLs -->
-            </div>
-          </div>
-
-          <!-- 2. Domains -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="2" y1="12" x2="22" y2="12"></line>
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                </svg>
-                Domains & Root Registrars
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-domains">
-              <!-- Dynamically populated Domains -->
-            </div>
-          </div>
-
-          <!-- 3. IP Addresses -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
-                </svg>
-                IP Addresses & Scopes
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-ips">
-              <!-- Dynamically populated IPs -->
-            </div>
-          </div>
-
-          <!-- 4. Cryptographic Hashes -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="4" y1="9" x2="20" y2="9"></line>
-                  <line x1="4" y1="15" x2="20" y2="15"></line>
-                  <line x1="10" y1="3" x2="8" y2="21"></line>
-                  <line x1="16" y1="3" x2="14" y2="21"></line>
-                </svg>
-                Cryptographic File Hashes
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-hashes">
-              <!-- Dynamically populated Hashes -->
-            </div>
-          </div>
-
-          <!-- 5. Email Addresses -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                  <polyline points="22,6 12,13 2,6"></polyline>
-                </svg>
-                Email Addresses
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-emails">
-              <!-- Dynamically populated Email Addresses -->
-            </div>
-          </div>
-
-          <!-- 6. Hostnames -->
-          <div class="ioc-category-card">
-            <div class="ioc-category-header">
-              <div class="ioc-category-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"></path>
-                  <line x1="8" y1="16" x2="8.01" y2="16"></line>
-                  <line x1="8" y1="20" x2="8.01" y2="20"></line>
-                  <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                  <line x1="12" y1="22" x2="12.01" y2="22"></line>
-                  <line x1="16" y1="16" x2="16.01" y2="16"></line>
-                  <line x1="16" y1="20" x2="16.01" y2="20"></line>
-                </svg>
-                Observed Hostnames
-              </div>
-            </div>
-            <div class="ioc-list" id="ioc-list-hostnames">
-              <!-- Dynamically populated Hostnames -->
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- =======================================================
-         FEATURE 3: EMAIL FORENSICS PANEL
-         ======================================================= -->
-    <section class="forensics-section" id="email-forensics-container">
-      <div class="forensics-panel">
-        <div class="forensics-header">
-          <div>
-            <h2 class="forensics-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-              Email Forensics & Transmission Path Analysis
-            </h2>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
-              Raw RFC 822 header forensics, chronological SMTP Received relay reconstruction, and attachment verification
-            </div>
-          </div>
-          <div class="evidence-hash-pill" id="evidence-hash-display">
-            <span>SHA-256:</span>
-            <span id="evidence-hash-value" style="color: #c084fc;">Pending Analysis...</span>
-          </div>
-        </div>
-
-        <!-- 4-Quadrant Forensics Grid -->
-        <div class="forensics-grid">
-
-          <!-- Quadrant 1: Sender Identity Alignment -->
-          <div class="forensic-card">
-            <div class="forensic-card-title">
+            <button type="button" class="case-tab-btn" data-tab="graph">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="18" cy="6" r="3"></circle>
+                <line x1="8.5" y1="7.5" x2="15.5" y2="16.5"></line>
               </svg>
-              Sender Identity Alignment
-            </div>
-            <div class="identity-rows">
-              <div class="identity-row">
-                <span class="identity-label">From:</span>
-                <span class="identity-value" id="forensic-from">-</span>
-              </div>
-              <div class="identity-row">
-                <span class="identity-label">Reply-To:</span>
-                <span class="identity-value" id="forensic-reply-to">-</span>
-                <span id="badge-reply-to-status" class="match-badge">Aligned</span>
-              </div>
-              <div class="identity-row">
-                <span class="identity-label">Return-Path:</span>
-                <span class="identity-value" id="forensic-return-path">-</span>
-                <span id="badge-return-path-status" class="match-badge">Aligned</span>
-              </div>
-              <div class="identity-row">
-                <span class="identity-label">Message-ID:</span>
-                <span class="identity-value" id="forensic-message-id" style="font-size: 0.75rem;">-</span>
-              </div>
-            </div>
-          </div>
+              Attack Graph
+            </button>
 
-          <!-- Quadrant 2: Authentication Matrix -->
-          <div class="forensic-card">
-            <div class="forensic-card-title">
+            <button type="button" class="case-tab-btn" data-tab="evidence">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
               </svg>
-              Authentication Verification
-            </div>
-            <div class="auth-matrix-grid">
-              <div class="auth-matrix-cell">
-                <div class="auth-matrix-proto">SPF</div>
-                <div class="auth-matrix-status auth-pass" id="auth-spf-status">PASS</div>
-              </div>
-              <div class="auth-matrix-cell">
-                <div class="auth-matrix-proto">DKIM</div>
-                <div class="auth-matrix-status auth-fail" id="auth-dkim-status">FAIL</div>
-              </div>
-              <div class="auth-matrix-cell">
-                <div class="auth-matrix-proto">DMARC</div>
-                <div class="auth-matrix-status auth-fail" id="auth-dmarc-status">FAIL</div>
-              </div>
-            </div>
-            <div class="overall-auth-banner">
-              <span style="color: var(--text-dim); font-size: 0.8rem; font-weight: 600;">Overall Cryptographic Health:</span>
-              <span id="overall-auth-badge" style="font-weight: 700; color: #ef4444;">SUSPICIOUS</span>
-            </div>
-          </div>
+              Evidence
+            </button>
 
-          <!-- Quadrant 3: SMTP Received Relay Path -->
-          <div class="forensic-card">
-            <div class="forensic-card-title">
+            <button type="button" class="case-tab-btn" data-tab="reports">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               </svg>
-              SMTP Relay Path (Chronological)
+              Report
+            </button>
+          </nav>
+
+          <!-- TAB 1: OVERVIEW -->
+          <div id="tab-pane-overview" class="tab-pane active">
+            <div class="nl-summary-box">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--brand-cyan); margin-bottom: 4px;">
+                Analyst Executive Summary
+              </div>
+              <div id="case-nl-summary-text" style="font-size: 1rem; color: #f8fafc; line-height: 1.6;">
+                Evaluating threat vectors...
+              </div>
             </div>
-            <div class="relay-timeline" id="relay-hops-container">
-              <!-- Dynamically populated relay hops -->
-            </div>
-            <div class="origin-candidate-callout" id="originating-candidate-box">
-              <strong>Originating Infrastructure Candidate:</strong>
-              <div id="originating-candidate-text" style="font-family: var(--font-mono); margin-top: 2px;">-</div>
+
+            <div class="overview-grid">
+              <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  Contributing Risk Factors Ranked by Weight
+                </div>
+                <div id="case-risk-factors-container">
+                  <!-- Dynamic factor cards -->
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem;">
+                  Attack Classification Justifications
+                </div>
+                <div class="glass-panel" id="case-threat-justifications-container" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <!-- Dynamic category justifications -->
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Quadrant 4: Forensic Anomalies & Attachments -->
-          <div class="forensic-card">
-            <div class="forensic-card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-              Routing Anomalies & Attachments
-            </div>
-            
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.5rem;">
-              Observed Anomalies
-            </div>
-            <div class="anomalies-list" id="forensic-anomalies-list">
-              <!-- Dynamically populated anomalies -->
-            </div>
+          <!-- TAB 2: FORENSICS -->
+          <div id="tab-pane-forensics" class="tab-pane">
+            <div class="forensics-2col">
+              
+              <!-- Sender Alignment & Auth -->
+              <div class="glass-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title">Sender Identity & Header Verification</h3>
+                </div>
 
-            <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin-top: 1rem; margin-bottom: 0.5rem;">
-              Attachment Forensics
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.25rem;">
+                  <div class="identity-row">
+                    <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; width: 90px;">FROM:</span>
+                    <span id="case-forensic-from" style="font-family: var(--font-mono); font-size: 0.82rem;">-</span>
+                  </div>
+                  <div class="identity-row">
+                    <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; width: 90px;">REPLY-TO:</span>
+                    <span id="case-forensic-reply-to" style="font-family: var(--font-mono); font-size: 0.82rem;">-</span>
+                    <span id="case-badge-reply-to" class="status-badge status-clean">Aligned</span>
+                  </div>
+                  <div class="identity-row">
+                    <span style="color: var(--text-muted); font-size: 0.75rem; font-weight: 700; width: 90px;">RETURN-PATH:</span>
+                    <span id="case-forensic-return-path" style="font-family: var(--font-mono); font-size: 0.82rem;">-</span>
+                    <span id="case-badge-return-path" class="status-badge status-clean">Aligned</span>
+                  </div>
+                </div>
+
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">
+                  Cryptographic Authentication Matrix
+                </div>
+                <div class="auth-matrix-grid">
+                  <div class="auth-matrix-cell">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">SPF</div>
+                    <div id="case-auth-spf" style="font-family: var(--font-mono); font-weight: 800; color: #10b981;">PASS</div>
+                  </div>
+                  <div class="auth-matrix-cell">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">DKIM</div>
+                    <div id="case-auth-dkim" style="font-family: var(--font-mono); font-weight: 800; color: #ef4444;">FAIL</div>
+                  </div>
+                  <div class="auth-matrix-cell">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted);">DMARC</div>
+                    <div id="case-auth-dmarc" style="font-family: var(--font-mono); font-weight: 800; color: #ef4444;">FAIL</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SMTP Relay Path Timeline -->
+              <div class="glass-panel">
+                <div class="panel-header">
+                  <h3 class="panel-title">SMTP Transmission Path</h3>
+                </div>
+                <div id="case-relay-hops-container">
+                  <!-- Dynamic relay hops -->
+                </div>
+              </div>
+
             </div>
-            <div class="attachments-table" id="forensic-attachments-list">
-              <!-- Dynamically populated attachments -->
+          </div>
+
+          <!-- TAB 3: IOCS -->
+          <div id="tab-pane-iocs" class="tab-pane">
+            <div class="glass-panel">
+              <div class="panel-header">
+                <div class="ioc-segmented-bar">
+                  <button type="button" class="ioc-segment-btn active" data-ioc-filter="all">All IOCs</button>
+                  <button type="button" class="ioc-segment-btn" data-ioc-filter="domain">Domains</button>
+                  <button type="button" class="ioc-segment-btn" data-ioc-filter="ip">IP Addresses</button>
+                  <button type="button" class="ioc-segment-btn" data-ioc-filter="url">URLs</button>
+                  <button type="button" class="ioc-segment-btn" data-ioc-filter="hash">Hashes</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-table-action" id="case-btn-copy-all-iocs">📋 Copy All</button>
+                  <button type="button" class="btn-table-action" id="case-btn-export-ioc-json">💾 Export JSON</button>
+                </div>
+              </div>
+
+              <div class="data-table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Indicator Value</th>
+                      <th>Type</th>
+                      <th>Scope / Origin</th>
+                      <th>Reputation Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="case-iocs-tbody">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: THREAT INTELLIGENCE -->
+          <div id="tab-pane-intel" class="tab-pane">
+            <div class="intel-card-grid" id="case-intel-cards-container">
+              <!-- Enriched Threat Intelligence Cards -->
+            </div>
+          </div>
+
+          <!-- TAB 5: ATTACK GRAPH -->
+          <div id="tab-pane-graph" class="tab-pane">
+            <div class="glass-panel" style="padding: 1rem;">
+              <div class="panel-header" style="margin-bottom: 0.75rem;">
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-table-action" id="case-btn-fit-graph">🔍 Fit View</button>
+                  <a href="#/attack-graph" class="btn-table-action">🌐 Open Dedicated Graph Workspace →</a>
+                </div>
+              </div>
+              <div class="graph-workspace-box">
+                <div id="cy-attack-graph"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 6: EVIDENCE -->
+          <div id="tab-pane-evidence" class="tab-pane">
+            <div class="evidence-card">
+              <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem;">Cryptographic Proof of Evidence</h3>
+              <div style="font-size: 0.82rem; color: var(--text-muted);">
+                Deterministic cryptographic hash of the original raw RFC 822 email payload establishing non-repudiation.
+              </div>
+              <div class="hash-signature-block" id="case-evidence-hash">
+                SHA-256: 664f61f41747557613589fa5a558661d427129a32292b920663456a6956f
+              </div>
+              <div style="display: flex; gap: 16px; margin-top: 1rem; font-size: 0.85rem;">
+                <div>Ledger Status: <span class="status-badge status-clean">VERIFIED</span></div>
+                <div>Algorithm: <strong>SHA-256 (RFC 6234)</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 7: REPORTS -->
+          <div id="tab-pane-reports" class="tab-pane">
+            <div class="report-paper-card">
+              <div class="report-header-banner">
+                <div>
+                  <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--brand-cyan);">ThreatLens Forensic Dossier</h2>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);" id="report-case-timestamp">Generated: 2026-08-28</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn-table-action" onclick="window.print()">🖨️ Print / PDF</button>
+                </div>
+              </div>
+
+              <div id="report-rendered-body" style="font-size: 0.88rem; line-height: 1.6; color: var(--text-secondary);">
+                <!-- Populated dynamically via JS -->
+              </div>
             </div>
           </div>
 
         </div>
-      </div>
-    </section>
 
-    <!-- =======================================================
-         FEATURE 2: EXPLAINABLE AI (XAI) SECTION
-         ======================================================= -->
-    <section class="xai-section" id="explainable-ai-container">
-      <div class="xai-panel">
-        
-        <!-- Header -->
-        <div class="xai-header">
-          <div>
-            <h2 class="xai-title">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7z"></path>
-                <line x1="10" y1="22" x2="14" y2="22"></line>
-              </svg>
-              Why Did MailTrace AI Consider This Dangerous?
-            </h2>
-            <div class="xai-subtitle">Transparent signal attribution, concrete evidence grounding, and threat justification</div>
+        <!-- =======================================================
+             VIEW 5: THREAT INTELLIGENCE HUB
+             ======================================================= -->
+        <div id="view-threat-intelligence" class="view-pane">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">Threat Intelligence Global Hub</h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  Cross-investigation indicator reputation and external sensor correlation
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="topbar-search-input" id="intel-hub-search-input" placeholder="Search IP, Domain, Hash..." style="width: 240px;">
+                <button type="button" class="btn-table-action" id="btn-intel-hub-search">Lookup</button>
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Indicator</th>
+                    <th>Type</th>
+                    <th>Reputation</th>
+                    <th>VirusTotal Signals</th>
+                    <th>AbuseIPDB Score</th>
+                    <th>ISP / Provider</th>
+                  </tr>
+                </thead>
+                <tbody id="intel-hub-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Natural-Language Analyst Executive Summary -->
-        <div class="nl-summary-card">
-          <div class="nl-summary-title">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            Analyst Executive Summary
-          </div>
-          <div class="nl-summary-text" id="nl-summary-content">
-            Evaluating threat vectors...
+        <!-- =======================================================
+             VIEW 6: ATTACK GRAPH DEDICATED WORKSPACE
+             ======================================================= -->
+        <div id="view-attack-graph" class="view-pane">
+          <div class="glass-panel" style="padding: 1rem;">
+            <div class="panel-header" style="margin-bottom: 0.75rem;">
+              <div>
+                <h2 class="panel-title">Multi-Case Attack Graph & Campaign Explorer</h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                  Graph topology showing shared attack infrastructure across all correlated investigations
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-table-action" id="btn-dedicated-fit-graph">🔍 Fit View</button>
+              </div>
+            </div>
+
+            <div class="graph-workspace-box" style="height: 600px;">
+              <div id="cy-dedicated-graph"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Benign Reassurance Box (Hidden by default, shown for low-risk emails) -->
-        <div class="benign-reassurance-box" id="benign-box-container" style="display: none;">
-          <div class="benign-reassurance-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            Clean Threat Inspection Findings (Low Risk)
-          </div>
-          <div id="benign-assurances-list">
-            <!-- Dynamically populated checkmarks -->
+        <!-- =======================================================
+             VIEW 7: REPORTS HUB
+             ======================================================= -->
+        <div id="view-reports" class="view-pane">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Forensic Incident Reports</h2>
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Report ID</th>
+                    <th>Case ID</th>
+                    <th>Threat Classification</th>
+                    <th>Score</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-hub-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Two Column Explainable Grid -->
-        <div class="xai-grid">
-          
-          <!-- Column 1: Contributing Risk Factors Ranked by Weight -->
-          <div>
-            <div class="section-subtitle">
-              <span>Contributing Risk Factors & Evidence</span>
-              <span style="font-size: 0.7rem; color: var(--accent-cyan);">Ranked by Contribution</span>
+        <!-- =======================================================
+             VIEW 8: EVIDENCE LEDGER
+             ======================================================= -->
+        <div id="view-evidence" class="view-pane">
+          <div class="glass-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Cryptographic Evidence Ledger</h2>
             </div>
-            <div class="factors-list" id="risk-factors-container">
-              <!-- Dynamically populated factor cards -->
-            </div>
-          </div>
-
-          <!-- Column 2: Threat Category Justifications -->
-          <div>
-            <div class="section-subtitle">
-              <span>Threat Category Justifications</span>
-              <span style="font-size: 0.7rem; color: var(--text-dim);">Confidence vs Score</span>
-            </div>
-            <div class="threat-explanations-card" id="threat-justifications-container">
-              <!-- Dynamically populated category justifications -->
-            </div>
-
-            <!-- Trust / Uncertainty Disclosures Note -->
-            <div class="trust-note" id="trust-note-content">
-              <strong>Assessment Boundaries & Uncertainty Note</strong><br>
-              Assessment is based on observed deterministic and linguistic indicators. A high threat score indicates elevated risk, but does not by itself prove malicious intent without verification.
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Case ID</th>
+                    <th>Payload SHA-256 Hash</th>
+                    <th>Timestamp (UTC)</th>
+                    <th>Integrity Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="evidence-hub-tbody">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
             </div>
           </div>
-
         </div>
 
-      </div>
-    </section>
-
-  </main>
+      </main>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 </body>
