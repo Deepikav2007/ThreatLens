@@ -1,0 +1,1 @@
+"""MailTrace AI Models Package"""
