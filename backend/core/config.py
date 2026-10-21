@@ -65,3 +65,14 @@ INTEL_CACHE_TTL_SECONDS: int = int(os.getenv("INTEL_CACHE_TTL_SECONDS", "3600"))
 APP_NAME = "ThreatLens"
 APP_VERSION = "2.0.0"
 API_PREFIX = "/api/v1"
+
+# ==========================================================
+# GraphOps & Neo4j Configuration
+# ==========================================================
+NEO4J_URI: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER: str = os.getenv("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD: str = os.getenv("NEO4J_PASSWORD", "threatlens_password")
+NEO4J_DATABASE: str = os.getenv("NEO4J_DATABASE", "neo4j")
+NEO4J_CONNECTION_TIMEOUT_SECONDS: float = float(os.getenv("NEO4J_CONNECTION_TIMEOUT_SECONDS", "5.0"))
+NEO4J_MAX_CONNECTION_LIFETIME_SECONDS: float = float(os.getenv("NEO4J_MAX_CONNECTION_LIFETIME_SECONDS", "3600.0"))
+NEO4J_MAX_CONNECTION_POOL_SIZE: int = int(os.getenv("NEO4J_MAX_CONNECTION_POOL_SIZE", "50"))

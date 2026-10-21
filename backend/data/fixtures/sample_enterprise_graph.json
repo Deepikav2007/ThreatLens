@@ -1,0 +1,492 @@
+{
+  "dataset_name": "simulated_soc_enterprise_fixture_v1",
+  "disclaimer": "SIMULATED_SOC_ENTERPRISE_FIXTURE - ALL DATA IS SYNTHETIC FOR TESTING AND HACKATHON DEMONSTRATION",
+  "generated_at": "2026-10-20T07:25:00Z",
+  "entities": {
+    "users": [
+      {
+        "id": "USR-101",
+        "user_id": "USR-101",
+        "email": "victim1@corporation.com",
+        "name": "Alice Vance",
+        "department": "Finance",
+        "role": "Financial Analyst",
+        "is_admin": false,
+        "is_service_account": false,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      },
+      {
+        "id": "USR-102",
+        "user_id": "USR-102",
+        "email": "victim2@corporation.com",
+        "name": "Bob Martinez",
+        "department": "IT Support",
+        "role": "Helpdesk Tier 2",
+        "is_admin": false,
+        "is_service_account": false,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      },
+      {
+        "id": "USR-103",
+        "user_id": "USR-103",
+        "email": "employee@corporation.com",
+        "name": "Charlie Davis",
+        "department": "Engineering",
+        "role": "DevOps Engineer",
+        "is_admin": false,
+        "is_service_account": false,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      },
+      {
+        "id": "USR-201",
+        "user_id": "USR-201",
+        "email": "accounting@corporation.com",
+        "name": "Dana Miller",
+        "department": "Accounting",
+        "role": "Controller",
+        "is_admin": false,
+        "is_service_account": false,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      },
+      {
+        "id": "SVC-BACKUP",
+        "user_id": "SVC-BACKUP",
+        "email": "svc_backup@corporation.com",
+        "name": "Backup Service Principal",
+        "department": "Infrastructure",
+        "role": "Service Account",
+        "is_admin": true,
+        "is_service_account": true,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      },
+      {
+        "id": "USR-999",
+        "user_id": "USR-999",
+        "email": "ceo@corporation.com",
+        "name": "James Vance",
+        "department": "Executive",
+        "role": "Chief Executive Officer",
+        "is_admin": false,
+        "is_service_account": false,
+        "status": "ACTIVE",
+        "data": { "provenance": "SIMULATED_ACTIVE_DIRECTORY" }
+      }
+    ],
+    "devices": [
+      {
+        "id": "DEV-WS-101",
+        "device_id": "DEV-WS-101",
+        "hostname": "ws-fin-101.corp",
+        "ip_address": "10.0.1.101",
+        "mac_address": "00:50:56:A1:B2:01",
+        "os": "Windows 11 Enterprise",
+        "subnet": "10.0.1.0/24",
+        "is_isolated": false,
+        "criticality": "LOW",
+        "data": { "provenance": "SIMULATED_EDR_INVENTORY" }
+      },
+      {
+        "id": "DEV-WS-102",
+        "device_id": "DEV-WS-102",
+        "hostname": "ws-it-102.corp",
+        "ip_address": "10.0.1.102",
+        "mac_address": "00:50:56:A1:B2:02",
+        "os": "Windows 11 Enterprise",
+        "subnet": "10.0.1.0/24",
+        "is_isolated": false,
+        "criticality": "MEDIUM",
+        "data": { "provenance": "SIMULATED_EDR_INVENTORY" }
+      },
+      {
+        "id": "DEV-WS-103",
+        "device_id": "DEV-WS-103",
+        "hostname": "ws-eng-103.corp",
+        "ip_address": "10.0.1.103",
+        "mac_address": "00:50:56:A1:B2:03",
+        "os": "macOS Sonoma 14.5",
+        "subnet": "10.0.1.0/24",
+        "is_isolated": false,
+        "criticality": "LOW",
+        "data": { "provenance": "SIMULATED_EDR_INVENTORY" }
+      },
+      {
+        "id": "DEV-WS-201",
+        "device_id": "DEV-WS-201",
+        "hostname": "ws-act-201.corp",
+        "ip_address": "10.0.1.201",
+        "mac_address": "00:50:56:A1:B2:04",
+        "os": "Windows 11 Enterprise",
+        "subnet": "10.0.1.0/24",
+        "is_isolated": false,
+        "criticality": "MEDIUM",
+        "data": { "provenance": "SIMULATED_EDR_INVENTORY" }
+      }
+    ],
+    "servers": [
+      {
+        "id": "SRV-APP-01",
+        "server_id": "SRV-APP-01",
+        "name": "Corporate Application Jump Server",
+        "hostname": "app-gateway.internal.corp",
+        "ip_address": "10.0.2.10",
+        "tier": "Application",
+        "environment": "Production",
+        "criticality": "HIGH",
+        "is_isolated": false,
+        "data": { "provenance": "SIMULATED_CMDB", "zone": "DMZ-Internal" }
+      },
+      {
+        "id": "SRV-DB-01",
+        "server_id": "SRV-DB-01",
+        "name": "Customer Core Database Host",
+        "hostname": "db-cluster-01.internal.corp",
+        "ip_address": "10.0.3.50",
+        "tier": "Database",
+        "environment": "Production",
+        "criticality": "CRITICAL",
+        "is_isolated": false,
+        "data": { "provenance": "SIMULATED_CMDB", "zone": "Data-Tier" }
+      },
+      {
+        "id": "SRV-DC-01",
+        "server_id": "SRV-DC-01",
+        "name": "Enterprise Domain Controller 01",
+        "hostname": "dc01.internal.corp",
+        "ip_address": "10.0.0.5",
+        "tier": "Core",
+        "environment": "Production",
+        "criticality": "CRITICAL",
+        "is_isolated": false,
+        "data": { "provenance": "SIMULATED_CMDB", "zone": "Identity-Core" }
+      },
+      {
+        "id": "SRV-BACKUP-01",
+        "server_id": "SRV-BACKUP-01",
+        "name": "Disaster Recovery Backup Server",
+        "hostname": "backup01.internal.corp",
+        "ip_address": "10.0.4.20",
+        "tier": "Backup",
+        "environment": "Production",
+        "criticality": "HIGH",
+        "is_isolated": false,
+        "data": { "provenance": "SIMULATED_CMDB" }
+      }
+    ],
+    "applications": [
+      {
+        "id": "APP-ERP-01",
+        "app_id": "APP-ERP-01",
+        "name": "Financial ERP Portal",
+        "version": "4.2.1",
+        "port": 443,
+        "service_type": "Web",
+        "environment": "Production",
+        "data": { "provenance": "SIMULATED_APP_CATALOG" }
+      },
+      {
+        "id": "APP-AD-01",
+        "app_id": "APP-AD-01",
+        "name": "Active Directory Domain Services",
+        "version": "Windows 2022 Forest",
+        "port": 389,
+        "service_type": "Auth",
+        "environment": "Production",
+        "data": { "provenance": "SIMULATED_APP_CATALOG" }
+      },
+      {
+        "id": "APP-PG-01",
+        "app_id": "APP-PG-01",
+        "name": "Customer PostgreSQL Data Cluster",
+        "version": "16.1",
+        "port": 5432,
+        "service_type": "DB",
+        "environment": "Production",
+        "data": { "provenance": "SIMULATED_APP_CATALOG" }
+      }
+    ],
+    "ips": [
+      { "id": "10.0.1.101", "ip": "10.0.1.101", "version": 4, "scope": "internal", "subnet": "10.0.1.0/24", "is_monitored": true },
+      { "id": "10.0.1.102", "ip": "10.0.1.102", "version": 4, "scope": "internal", "subnet": "10.0.1.0/24", "is_monitored": true },
+      { "id": "10.0.1.103", "ip": "10.0.1.103", "version": 4, "scope": "internal", "subnet": "10.0.1.0/24", "is_monitored": true },
+      { "id": "10.0.2.10", "ip": "10.0.2.10", "version": 4, "scope": "internal", "subnet": "10.0.2.0/24", "is_monitored": true },
+      { "id": "10.0.3.50", "ip": "10.0.3.50", "version": 4, "scope": "internal", "subnet": "10.0.3.0/24", "is_monitored": true },
+      { "id": "10.0.0.5", "ip": "10.0.0.5", "version": 4, "scope": "internal", "subnet": "10.0.0.0/24", "is_monitored": true }
+    ],
+    "vulnerabilities": [
+      {
+        "id": "CVE-2024-21413",
+        "cve_id": "CVE-2024-21413",
+        "cvss_score": 9.8,
+        "severity": "CRITICAL",
+        "description": "Microsoft Outlook NTLM Credential Leaking / Remote Code Execution Vulnerability (Moniker Link)",
+        "exploit_available": true,
+        "patch_available": true
+      },
+      {
+        "id": "CVE-2023-38606",
+        "cve_id": "CVE-2023-38606",
+        "cvss_score": 7.8,
+        "severity": "HIGH",
+        "description": "Linux Kernel Local Privilege Escalation via memory mapping subsystem",
+        "exploit_available": true,
+        "patch_available": true
+      },
+      {
+        "id": "CVE-2023-44487",
+        "cve_id": "CVE-2023-44487",
+        "cvss_score": 7.5,
+        "severity": "HIGH",
+        "description": "HTTP/2 Rapid Reset Denial of Service Vulnerability",
+        "exploit_available": true,
+        "patch_available": true
+      }
+    ],
+    "critical_assets": [
+      {
+        "id": "CRIT-DB-FINANCIAL",
+        "asset_id": "CRIT-DB-FINANCIAL",
+        "name": "Customer Financial Ledger & Payment Vault",
+        "category": "FINANCIAL_RECORDS",
+        "impact_score": 95,
+        "data_classification": "RESTRICTED",
+        "owner_department": "Finance"
+      },
+      {
+        "id": "CRIT-AD-DOMAIN-ROOT",
+        "asset_id": "CRIT-AD-DOMAIN-ROOT",
+        "name": "Active Directory Domain Controller Enterprise Root",
+        "category": "DOMAIN_CONTROLLER",
+        "impact_score": 100,
+        "data_classification": "TOP_SECRET",
+        "owner_department": "IT Infrastructure"
+      },
+      {
+        "id": "CRIT-PII-CUSTOMER",
+        "asset_id": "CRIT-PII-CUSTOMER",
+        "name": "Customer PII & Identity Master Database",
+        "category": "CUSTOMER_PII",
+        "impact_score": 90,
+        "data_classification": "CONFIDENTIAL",
+        "owner_department": "Compliance"
+      }
+    ],
+    "security_events": [
+      {
+        "id": "EVT-MT101-PHISH",
+        "event_id": "EVT-MT101-PHISH",
+        "event_type": "PHISHING_INCIDENT",
+        "severity": "CRITICAL",
+        "timestamp": "2026-08-28T10:15:00Z",
+        "case_id": "MT-101",
+        "provenance": "ThreatLens Email Forensics"
+      }
+    ]
+  },
+  "relationships": {
+    "relationships": [
+      {
+        "source_id": "user:victim1@corporation.com",
+        "target_id": "device:dev-ws-101",
+        "relationship_type": "USES",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Inventory",
+        "timestamp": "2026-08-01T08:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "user:victim2@corporation.com",
+        "target_id": "device:dev-ws-102",
+        "relationship_type": "USES",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Inventory",
+        "timestamp": "2026-08-01T08:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "user:employee@corporation.com",
+        "target_id": "device:dev-ws-103",
+        "relationship_type": "USES",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Inventory",
+        "timestamp": "2026-08-01T08:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "user:accounting@corporation.com",
+        "target_id": "device:dev-ws-201",
+        "relationship_type": "USES",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Inventory",
+        "timestamp": "2026-08-01T08:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "device:dev-ws-101",
+        "target_id": "server:srv-app-01",
+        "relationship_type": "OBSERVED_CONNECTION",
+        "evidence_class": "OBSERVED",
+        "provenance": "Core Firewall NetFlow Sensor",
+        "timestamp": "2026-08-28T09:30:00Z",
+        "confidence": 1.0,
+        "properties": { "port": 443, "protocol": "TCP" }
+      },
+      {
+        "source_id": "device:dev-ws-102",
+        "target_id": "server:srv-app-01",
+        "relationship_type": "OBSERVED_CONNECTION",
+        "evidence_class": "OBSERVED",
+        "provenance": "Core Firewall NetFlow Sensor",
+        "timestamp": "2026-08-28T09:45:00Z",
+        "confidence": 1.0,
+        "properties": { "port": 443, "protocol": "TCP" }
+      },
+      {
+        "source_id": "user:victim2@corporation.com",
+        "target_id": "server:srv-app-01",
+        "relationship_type": "HAS_PERMISSION",
+        "evidence_class": "AUTHORIZED_ACCESS",
+        "provenance": "AD Security Group: App_Admins",
+        "timestamp": "2026-01-15T12:00:00Z",
+        "confidence": 1.0,
+        "properties": { "privilege_level": "ADMINISTRATOR" }
+      },
+      {
+        "source_id": "user:victim2@corporation.com",
+        "target_id": "server:srv-app-01",
+        "relationship_type": "LOGGED_IN_TO",
+        "evidence_class": "OBSERVED",
+        "provenance": "Windows Security Event 4624",
+        "timestamp": "2026-08-28T08:15:00Z",
+        "confidence": 1.0,
+        "properties": { "logon_type": 10 }
+      },
+      {
+        "source_id": "user:employee@corporation.com",
+        "target_id": "server:srv-db-01",
+        "relationship_type": "HAS_PERMISSION",
+        "evidence_class": "AUTHORIZED_ACCESS",
+        "provenance": "Postgres User Grant",
+        "timestamp": "2026-03-10T14:00:00Z",
+        "confidence": 1.0,
+        "properties": { "privilege_level": "READ_ONLY" }
+      },
+      {
+        "source_id": "user:svc_backup@corporation.com",
+        "target_id": "server:srv-dc-01",
+        "relationship_type": "HAS_PERMISSION",
+        "evidence_class": "AUTHORIZED_ACCESS",
+        "provenance": "Enterprise Backup Operators Group",
+        "timestamp": "2025-11-01T00:00:00Z",
+        "confidence": 1.0,
+        "properties": { "privilege_level": "BACKUP_OPERATOR" }
+      },
+      {
+        "source_id": "server:srv-app-01",
+        "target_id": "app:app-erp-01",
+        "relationship_type": "HOSTS",
+        "evidence_class": "OBSERVED",
+        "provenance": "CMDB Service Catalog",
+        "timestamp": "2026-01-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-dc-01",
+        "target_id": "app:app-ad-01",
+        "relationship_type": "HOSTS",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Domain Configuration",
+        "timestamp": "2026-01-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-db-01",
+        "target_id": "app:app-pg-01",
+        "relationship_type": "HOSTS",
+        "evidence_class": "OBSERVED",
+        "provenance": "CMDB Service Catalog",
+        "timestamp": "2026-01-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-app-01",
+        "target_id": "server:srv-db-01",
+        "relationship_type": "OBSERVED_CONNECTION",
+        "evidence_class": "OBSERVED",
+        "provenance": "Database Gateway Connection Logs",
+        "timestamp": "2026-08-28T10:00:00Z",
+        "confidence": 1.0,
+        "properties": { "port": 5432, "protocol": "TCP" }
+      },
+      {
+        "source_id": "server:srv-app-01",
+        "target_id": "server:srv-dc-01",
+        "relationship_type": "OBSERVED_CONNECTION",
+        "evidence_class": "OBSERVED",
+        "provenance": "Kerberos TGS Audit Logs",
+        "timestamp": "2026-08-28T09:00:00Z",
+        "confidence": 1.0,
+        "properties": { "port": 88, "protocol": "TCP" }
+      },
+      {
+        "source_id": "server:srv-db-01",
+        "target_id": "critical:crit-db-financial",
+        "relationship_type": "CONTAINS_CRITICAL_DATA",
+        "evidence_class": "OBSERVED",
+        "provenance": "Data Classification Scanner",
+        "timestamp": "2026-08-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-db-01",
+        "target_id": "critical:crit-pii-customer",
+        "relationship_type": "CONTAINS_CRITICAL_DATA",
+        "evidence_class": "OBSERVED",
+        "provenance": "Data Classification Scanner",
+        "timestamp": "2026-08-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-dc-01",
+        "target_id": "critical:crit-ad-domain-root",
+        "relationship_type": "CONTAINS_CRITICAL_DATA",
+        "evidence_class": "OBSERVED",
+        "provenance": "ActiveDirectory Schema Root",
+        "timestamp": "2026-01-01T00:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "server:srv-app-01",
+        "target_id": "vuln:cve-2024-21413",
+        "relationship_type": "HAS_VULNERABILITY",
+        "evidence_class": "OBSERVED",
+        "provenance": "Qualys Enterprise Scanner",
+        "timestamp": "2026-08-20T03:00:00Z",
+        "confidence": 1.0
+      },
+      {
+        "source_id": "device:dev-ws-101",
+        "target_id": "server:srv-app-01",
+        "relationship_type": "POTENTIAL_EXPLOIT",
+        "evidence_class": "HYPOTHETICAL",
+        "provenance": "ThreatLens Attack Graph Modeler",
+        "timestamp": "2026-08-28T10:30:00Z",
+        "confidence": 0.85,
+        "properties": { "via_cve": "CVE-2024-21413", "attack_vector": "Moniker Link NTLM Relay" }
+      },
+      {
+        "source_id": "user:victim1@corporation.com",
+        "target_id": "event:evt-mt101-phish",
+        "relationship_type": "ASSOCIATED_WITH_CASE",
+        "evidence_class": "OBSERVED",
+        "provenance": "ThreatLens RFC 822 Forensic Ingestion",
+        "timestamp": "2026-08-28T10:15:00Z",
+        "confidence": 1.0
+      }
+    ]
+  }
+}

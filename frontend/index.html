@@ -94,6 +94,26 @@
           <span class="nav-label">Attack Graph</span>
         </a>
 
+        <div class="nav-section-label">Enterprise GraphOps</div>
+
+        <a href="#/graphops" class="nav-item" data-route="graphops" id="nav-item-graphops">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <circle cx="19" cy="5" r="2"></circle>
+              <circle cx="5" cy="5" r="2"></circle>
+              <circle cx="5" cy="19" r="2"></circle>
+              <circle cx="19" cy="19" r="2"></circle>
+              <line x1="12" y1="9" x2="19" y2="7"></line>
+              <line x1="12" y1="9" x2="5" y2="7"></line>
+              <line x1="12" y1="15" x2="5" y2="17"></line>
+              <line x1="12" y1="15" x2="19" y2="17"></line>
+            </svg>
+          </span>
+          <span class="nav-label">GraphOps Workspace</span>
+          <span class="nav-badge" style="background: rgba(56, 189, 248, 0.2); color: var(--brand-cyan);">Neo4j</span>
+        </a>
+
         <div class="nav-section-label">Audit & Governance</div>
 
         <a href="#/reports" class="nav-item" data-route="reports">
@@ -515,6 +535,16 @@
             </div>
 
             <div class="case-header-right">
+              <a href="#/graphops" id="btn-correlate-case-graphops" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(59, 130, 246, 0.3)); border: 1px solid var(--brand-cyan); color: #fff; font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; border-radius: var(--radius-sm); font-weight: 600;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <circle cx="19" cy="5" r="2"></circle>
+                  <circle cx="5" cy="5" r="2"></circle>
+                  <line x1="12" y1="9" x2="19" y2="7"></line>
+                  <line x1="12" y1="9" x2="5" y2="7"></line>
+                </svg>
+                GraphOps Workspace &rarr;
+              </a>
               <div class="case-score-gauge">
                 <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Threat Score</div>
                 <div class="case-score-num" id="case-detail-score" style="color: #f87171;">100 / 100</div>
@@ -886,6 +916,467 @@
               </table>
             </div>
           </div>
+        </div>
+
+        <!-- =======================================================
+             VIEW 9: GRAPHOPS INVESTIGATION & CONTAINMENT WORKSPACE
+             ======================================================= -->
+        <div id="view-graphops" class="view-pane">
+          
+          <!-- GraphOps Header & Database Connection Banner -->
+          <div class="glass-panel" style="margin-bottom: 1.25rem;">
+            <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <h2 class="panel-title" style="font-size: 1.25rem;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--brand-cyan);">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <circle cx="19" cy="5" r="2"></circle>
+                      <circle cx="5" cy="5" r="2"></circle>
+                      <circle cx="5" cy="19" r="2"></circle>
+                      <circle cx="19" cy="19" r="2"></circle>
+                      <line x1="12" y1="9" x2="19" y2="7"></line>
+                      <line x1="12" y1="9" x2="5" y2="7"></line>
+                      <line x1="12" y1="15" x2="5" y2="17"></line>
+                      <line x1="12" y1="15" x2="19" y2="17"></line>
+                    </svg>
+                    ThreatLens GraphOps Workspace
+                  </h2>
+                  <span class="status-badge" style="background: rgba(56, 189, 248, 0.15); color: var(--brand-cyan); border: 1px solid rgba(56, 189, 248, 0.3);">
+                    Neo4j Enterprise Graph
+                  </span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                  Organizational Security Graph Analytics &bull; Multi-Hop Blast-Radius Propagation &bull; Attack-Path Discovery &bull; Safe What-If Containment Simulator
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+                <div id="graphops-db-indicator" class="engine-status-pill" style="font-size: 0.75rem;">
+                  <span class="status-dot-pulse" style="background-color: #10b981;"></span>
+                  <span id="graphops-db-status-text">Neo4j Connected</span>
+                </div>
+                <button type="button" class="btn-table-action" id="btn-graphops-sync-fixture" style="padding: 6px 12px; font-weight: 600;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px; margin-right: 4px;">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                  </svg>
+                  Sync Enterprise Graph
+                </button>
+              </div>
+            </div>
+
+            <!-- Forensic Case Bridge Banner (Visible when correlated from Case) -->
+            <div id="graphops-case-bridge-banner" style="display: none; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem;">
+                <div>
+                  <span style="color: var(--brand-cyan); font-weight: 700;">Case Bridge Link:</span>
+                  <span id="graphops-bridge-case-label" style="color: #f8fafc; font-weight: 600; margin-left: 6px;">Case MT-101</span> &mdash;
+                  <span id="graphops-bridge-desc">Resolved recipient victim1@corporation.com to user:usr-101 and DEV-WS-101.</span>
+                </div>
+                <button type="button" id="btn-dismiss-bridge-banner" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">&times;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- GraphOps Mode Selection Tabs -->
+          <div class="case-tabs-nav" style="margin-bottom: 1.25rem;">
+            <button type="button" class="case-tab-btn active" id="tab-graphops-blast" data-mode="blast">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+              </svg>
+              1. Blast Radius (1-Hop / 2-Hop / 3-Hop)
+            </button>
+            <button type="button" class="case-tab-btn" id="tab-graphops-paths" data-mode="paths">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              2. Attack Paths &amp; Choke Points
+            </button>
+            <button type="button" class="case-tab-btn" id="tab-graphops-simulator" data-mode="simulator">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              3. What-If Containment Simulator
+            </button>
+            <button type="button" class="case-tab-btn" id="tab-graphops-anomalies" data-mode="anomalies">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              4. Access Anomaly Detection
+            </button>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="glass-panel" style="margin-bottom: 1.25rem; padding: 14px 18px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+              
+              <!-- Starting / Entry Node Selector -->
+              <div style="flex: 1; min-width: 240px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Compromised / Evaluated Entity:
+                </label>
+                <div style="display: flex; gap: 6px;">
+                  <select id="graphops-node-preset-select" class="form-input" style="width: auto; max-width: 200px; font-size: 0.8rem; background: var(--bg-input);">
+                    <option value="user:usr-101">Alice Vance (victim1@corporation.com)</option>
+                    <option value="device:dev-ws-101" selected>Workstation DEV-WS-101</option>
+                    <option value="device:dev-ws-102">Workstation DEV-WS-102</option>
+                    <option value="server:srv-app-01">Server SRV-APP-01 (Gateway)</option>
+                    <option value="user:usr-102">Bob Martinez (IT Support)</option>
+                    <option value="custom">Custom Canonical ID...</option>
+                  </select>
+                  <input type="text" id="graphops-node-input" class="form-input" placeholder="e.g. device:dev-ws-101" value="device:dev-ws-101" style="flex: 1; font-family: var(--font-mono); font-size: 0.82rem;">
+                </div>
+              </div>
+
+              <!-- Traversal Depth Selector -->
+              <div id="controls-group-hops" style="min-width: 140px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Neighborhood Depth:
+                </label>
+                <select id="graphops-hops-select" class="form-input" style="font-size: 0.8rem; background: var(--bg-input);">
+                  <option value="1">1 Hop (Direct Adjacent)</option>
+                  <option value="2">2 Hops (Intermediate)</option>
+                  <option value="3" selected>3 Hops (Crown Jewels Scope)</option>
+                </select>
+              </div>
+
+              <!-- Traversal Direction -->
+              <div id="controls-group-direction" style="min-width: 150px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Traversal Direction:
+                </label>
+                <select id="graphops-direction-select" class="form-input" style="font-size: 0.8rem; background: var(--bg-input);">
+                  <option value="OUTGOING" selected>OUTGOING (Lateral Spread)</option>
+                  <option value="INCOMING">INCOMING (Attacker Origin)</option>
+                  <option value="BOTH">BOTH (Full Boundary)</option>
+                </select>
+              </div>
+
+              <!-- Attack Path Target Selector (visible in paths mode) -->
+              <div id="controls-group-target" style="display: none; min-width: 220px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Target Crown Jewel:
+                </label>
+                <select id="graphops-target-select" class="form-input" style="font-size: 0.8rem; background: var(--bg-input);">
+                  <option value="ALL" selected>All Crown Jewels</option>
+                  <option value="critical:crit-db-financial">Financial Ledger &amp; Payment Vault</option>
+                  <option value="critical:crit-pii-customer">Customer PII Database</option>
+                  <option value="critical:crit-ad-domain-root">Active Directory Domain Root</option>
+                </select>
+              </div>
+
+              <!-- Simulator Action Selector (visible in simulator mode) -->
+              <div id="controls-group-sim-action" style="display: none; min-width: 220px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Simulated Intervention:
+                </label>
+                <select id="graphops-sim-action-select" class="form-input" style="font-size: 0.8rem; background: var(--bg-input);">
+                  <option value="ISOLATE_NODE" selected>ISOLATE_NODE (Sever all node links)</option>
+                  <option value="BLOCK_CONNECTION">BLOCK_CONNECTION (Sever network link)</option>
+                  <option value="REVOKE_PERMISSION">REVOKE_PERMISSION (Revoke role)</option>
+                </select>
+              </div>
+
+              <!-- Simulator Target Entity (visible in simulator mode) -->
+              <div id="controls-group-sim-target" style="display: none; min-width: 200px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Intervention Target:
+                </label>
+                <input type="text" id="graphops-sim-entity-input" class="form-input" value="server:srv-app-01" style="font-family: var(--font-mono); font-size: 0.82rem;">
+              </div>
+
+              <!-- Anomaly Sequence Preset (visible in anomalies mode) -->
+              <div id="controls-group-anomaly-preset" style="display: none; min-width: 280px;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;">
+                  Evaluation Access Sequence:
+                </label>
+                <select id="graphops-anomaly-preset-select" class="form-input" style="font-size: 0.8rem; background: var(--bg-input);">
+                  <option value="seq-benign-01" selected>Normal: Finance Analyst ERP Web Access</option>
+                  <option value="seq-new-legit-01">New User: Finance Employee Onboarding (Legitimate)</option>
+                  <option value="seq-policy-01">Policy Violation: Direct Client-to-Database SQL Bypass</option>
+                  <option value="seq-policy-02">Policy Violation: Unauthorized Domain Controller RDP</option>
+                  <option value="seq-suspicious-01">Critical Attack: Lateral CVE-2024-21413 Exploit</option>
+                  <option value="seq-suspicious-02">Critical Attack: Hijacked Backup Operator Principal</option>
+                  <option value="case-linked">Case MT-101: Current Investigation Observed Sequence</option>
+                </select>
+              </div>
+
+              <!-- Hypothetical Exploit Toggle -->
+              <div style="display: flex; align-items: center; gap: 8px; padding-bottom: 8px;">
+                <input type="checkbox" id="graphops-hypothetical-check" checked style="accent-color: var(--brand-cyan); width: 16px; height: 16px;">
+                <label for="graphops-hypothetical-check" style="font-size: 0.8rem; color: var(--text-secondary); cursor: pointer;">
+                  Include Hypothetical Preconditions (CVEs)
+                </label>
+              </div>
+
+              <!-- Main Execution Button -->
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="btn-graphops-execute" class="btn-primary" style="padding: 9px 18px; font-weight: 700; font-size: 0.85rem;">
+                  Run Blast Radius
+                </button>
+                <button type="button" id="btn-graphops-reset-sim" class="btn-table-action" style="display: none; padding: 9px 14px;">
+                  Reset Simulation
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Main Layout: Cytoscape Canvas on Left + Inspector / Cards on Right -->
+          <div style="display: grid; grid-template-columns: 1fr 380px; gap: 1.25rem; align-items: start;">
+            
+            <!-- Cytoscape Graph Canvas Panel -->
+            <div class="glass-panel" style="position: relative;">
+              <div class="panel-header" style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle);">
+                <div style="font-size: 0.85rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                  <span id="graphops-canvas-title">Neighborhood Topology View</span>
+                  <span id="graphops-canvas-stats" style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">(0 nodes, 0 edges)</span>
+                </div>
+
+                <!-- Cytoscape Canvas Toolbar -->
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn-table-action" id="btn-cy-zoom-in" title="Zoom In" style="padding: 4px 8px;">+</button>
+                  <button type="button" class="btn-table-action" id="btn-cy-zoom-out" title="Zoom Out" style="padding: 4px 8px;">&minus;</button>
+                  <button type="button" class="btn-table-action" id="btn-cy-fit" title="Fit to Screen" style="padding: 4px 8px;">Fit</button>
+                  <button type="button" class="btn-table-action" id="btn-cy-layout" title="Re-Layout" style="padding: 4px 8px;">Re-Layout</button>
+                </div>
+              </div>
+
+              <!-- The Cytoscape DOM element -->
+              <div id="cy-graphops-canvas" style="height: 600px; width: 100%; background: #07090e; border-radius: 0 0 var(--radius-md) var(--radius-md);"></div>
+
+              <!-- Cytoscape Visual Legend Overlay -->
+              <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(11, 16, 28, 0.92); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 0.72rem; display: flex; flex-wrap: wrap; gap: 12px; pointer-events: none; z-index: 10;">
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #38bdf8;"></span> Root Node</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span> Hop 1</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #f59e0b;"></span> Hop 2</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #6366f1;"></span> Hop 3</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; border: 1px solid #fbbf24;"></span> Crown Jewel</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 14px; height: 2px; background: #38bdf8;"></span> Observed</div>
+                <div style="display: flex; align-items: center; gap: 5px;"><span style="display: inline-block; width: 14px; height: 2px; background: #f59e0b; border-top: 1px dashed #f59e0b;"></span> Hypothetical</div>
+              </div>
+            </div>
+
+            <!-- Right Sidebar: Inspector & Analytics Panel -->
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+
+              <!-- Summary Assessment Card -->
+              <div class="glass-panel" id="graphops-assessment-card" style="padding: 14px 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                  Analysis Verdict
+                </div>
+                <div id="graphops-assessment-text" style="font-size: 0.85rem; line-height: 1.45; color: #f8fafc;">
+                  Select a starting entity and click Run to calculate multi-hop blast radius.
+                </div>
+
+                <div id="graphops-hops-pill-row" style="display: flex; gap: 8px; margin-top: 12px;">
+                  <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
+                    <div style="font-size: 0.7rem; color: #10b981; font-weight: 700;">Hop 1</div>
+                    <div id="graphops-hop1-count" style="font-size: 1.15rem; font-weight: 800; color: #f8fafc;">0</div>
+                  </div>
+                  <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
+                    <div style="font-size: 0.7rem; color: #f59e0b; font-weight: 700;">Hop 2</div>
+                    <div id="graphops-hop2-count" style="font-size: 1.15rem; font-weight: 800; color: #f8fafc;">0</div>
+                  </div>
+                  <div style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; text-align: center;">
+                    <div style="font-size: 0.7rem; color: #6366f1; font-weight: 700;">Hop 3</div>
+                    <div id="graphops-hop3-count" style="font-size: 1.15rem; font-weight: 800; color: #f8fafc;">0</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Interactive Node & Edge Telemetry Inspector -->
+              <div class="glass-panel" id="graphops-inspector-card" style="padding: 14px 16px;">
+                <div class="panel-header" style="padding: 0 0 10px 0; margin-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
+                    Entity &amp; Edge Inspector
+                  </div>
+                  <span id="inspector-badge" class="status-badge" style="display: none;">-</span>
+                </div>
+
+                <div id="inspector-empty-state" style="font-size: 0.8rem; color: var(--text-muted); padding: 10px 0; text-align: center;">
+                  Click any node or relationship on the graph canvas to inspect its verified evidence, provenance, and properties.
+                </div>
+
+                <div id="inspector-content" style="display: none; font-size: 0.82rem; line-height: 1.5;">
+                  <div style="margin-bottom: 8px;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Identifier:</div>
+                    <div id="insp-id" style="font-family: var(--font-mono); font-weight: 700; color: #7dd3fc; word-break: break-all;">-</div>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Title / Label:</div>
+                    <div id="insp-name" style="font-weight: 600; color: #f8fafc;">-</div>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Evidence Classification:</div>
+                    <div id="insp-evidence" style="font-weight: 600;">-</div>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Reporting Provenance / Sensor:</div>
+                    <div id="insp-provenance" style="color: var(--text-secondary);">-</div>
+                  </div>
+                  <div id="insp-timestamp-row" style="margin-bottom: 8px; display: none;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Timestamp:</div>
+                    <div id="insp-timestamp" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary);">-</div>
+                  </div>
+                  <div id="insp-props-row" style="margin-top: 10px; background: rgba(0,0,0,0.25); border-radius: var(--radius-xs); padding: 8px; font-family: var(--font-mono); font-size: 0.75rem; color: #cbd5e1; max-height: 140px; overflow-y: auto;">
+                    <!-- Additional properties -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Crown Jewels at Risk Card -->
+              <div class="glass-panel" id="graphops-jewels-card" style="padding: 14px 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #f87171; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                  <span>Critical Assets at Risk</span>
+                  <span id="graphops-jewels-count" class="status-badge status-malicious" style="font-size: 0.75rem;">0</span>
+                </div>
+                <div id="graphops-jewels-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;">
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">No Crown Jewels currently exposed.</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Bottom Panel: Choke Points / Attack Paths / What-If Comparison -->
+          <div style="margin-top: 1.25rem;">
+            
+            <!-- Choke-Point Recommendations Table -->
+            <div class="glass-panel" id="panel-choke-points" style="margin-bottom: 1.25rem;">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title" style="font-size: 1rem; color: #f8fafc;">Strategic Graph Choke Points</h3>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">Ranked entities that eliminate the highest percentage of lateral movement vectors</div>
+                </div>
+              </div>
+              <div class="data-table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">Rank</th>
+                      <th>Candidate Choke Point</th>
+                      <th>Category</th>
+                      <th>Paths Intercepted</th>
+                      <th>Protected Crown Jewels</th>
+                      <th>Recommended Containment Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="choke-points-tbody">
+                    <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Run Attack-Path or Choke-Point analysis to view recommendations.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- What-If Simulation Comparison Panel (Shown in Simulator Mode) -->
+            <div class="glass-panel" id="panel-simulation-results" style="display: none; margin-bottom: 1.25rem; border: 1px solid rgba(56, 189, 248, 0.35);">
+              <div class="panel-header">
+                <div>
+                  <h3 class="panel-title" style="font-size: 1rem; color: var(--brand-cyan);">What-If Containment Simulation Results</h3>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">In-Memory Projection &bull; Zero Live Graph Modification Guarantee</div>
+                </div>
+                <span id="sim-verdict-badge" class="status-badge status-clean" style="font-size: 0.8rem; font-weight: 700;">FULL CONTAINMENT</span>
+              </div>
+              <div style="padding: 14px 18px;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px;">
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Baseline Paths</div>
+                    <div id="sim-metric-baseline" style="font-size: 1.3rem; font-weight: 800; color: #f8fafc;">0</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Paths Eliminated</div>
+                    <div id="sim-metric-eliminated" style="font-size: 1.3rem; font-weight: 800; color: #10b981;">0</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Remaining Paths</div>
+                    <div id="sim-metric-remaining" style="font-size: 1.3rem; font-weight: 800; color: #f87171;">0</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Reduction Efficacy</div>
+                    <div id="sim-metric-pct" style="font-size: 1.3rem; font-weight: 800; color: var(--brand-cyan);">0%</div>
+                  </div>
+                </div>
+
+                <div id="sim-verdict-text" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 10px; line-height: 1.45;"></div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">
+                  Safety Guarantee: Simulation executed strictly against an in-memory graph projection. No live directory accounts were altered and no firewall rules were modified.
+                </div>
+              </div>
+            </div>
+
+            <!-- Access Anomaly Detection Results Panel (Shown in Anomalies Mode) -->
+            <div class="glass-panel" id="panel-anomaly-results" style="display: none; margin-bottom: 1.25rem; border: 1px solid rgba(245, 158, 11, 0.35);">
+              <div class="panel-header" style="flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <h3 class="panel-title" style="font-size: 1rem; color: #fbbf24;">Graph Access Anomaly Evaluation</h3>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">
+                    Evaluates relationship progression against documented network tiering and IAM baseline
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <button type="button" class="btn-table-action" id="btn-run-all-anomaly-benchmarks" style="padding: 4px 10px; font-size: 0.75rem;">
+                    Run 12-Case Benchmark Suite &rarr;
+                  </button>
+                  <span id="anomaly-verdict-badge" class="status-badge" style="font-size: 0.8rem; font-weight: 700;">BENIGN_EXPECTED</span>
+                </div>
+              </div>
+
+              <div style="padding: 14px 18px;">
+                <!-- Anomaly Metric Gauges -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px;">
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Anomaly Score</div>
+                    <div id="anomaly-metric-score" style="font-size: 1.3rem; font-weight: 800; color: #10b981;">0 / 100</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Baseline Confidence</div>
+                    <div id="anomaly-metric-confidence" style="font-size: 1.1rem; font-weight: 700; color: #38bdf8;">HIGH</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">History Status</div>
+                    <div id="anomaly-metric-history" style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">COMPLETE</div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; text-align: center;">
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Unexpected Steps</div>
+                    <div id="anomaly-metric-unexpected" style="font-size: 1.3rem; font-weight: 800; color: #10b981;">0</div>
+                  </div>
+                </div>
+
+                <div id="anomaly-summary-text" style="font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.45;">
+                  Select an access sequence and click Run to evaluate baseline conformity.
+                </div>
+
+                <!-- Unexpected Relationships Breakdown Table -->
+                <div class="data-table-container" style="margin-bottom: 12px;">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 40px;">Step</th>
+                        <th>Traversed Edge</th>
+                        <th>Deviation Category</th>
+                        <th>Baseline Policy Citation</th>
+                        <th>Analysis Explanation</th>
+                      </tr>
+                    </thead>
+                    <tbody id="anomaly-unexpected-tbody">
+                      <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No baseline deviations detected.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="font-size: 0.72rem; color: var(--text-muted); font-style: italic;">
+                  Advisory Guarantee: GraphOps anomaly findings are diagnostic indicators and do NOT execute automated blocking or alter live enterprise configurations.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
       </main>

@@ -1,0 +1,330 @@
+{
+  "dataset_name": "threatlens_graphops_anomaly_benchmark_v1",
+  "description": "Curated, held-out labeled access sequences representing normal enterprise operations, novel legitimate behavior, policy violations, and advanced attack sequences.",
+  "total_sequences": 12,
+  "class_distribution": {
+    "BENIGN_EXPECTED": 4,
+    "UNOBSERVED_NEW_LEGITIMATE": 2,
+    "POLICY_VIOLATION_UNAUTHORIZED": 3,
+    "SUSPICIOUS_ANOMALOUS": 3
+  },
+  "sequences": [
+    {
+      "sequence_id": "seq-benign-01",
+      "description": "Standard Finance Analyst login and ERP application access via gateway",
+      "evaluated_entity_id": "user:usr-101",
+      "ground_truth_label": "BENIGN_EXPECTED",
+      "expected_min_score": 0,
+      "expected_max_score": 15,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-101",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-101",
+          "properties": { "auth_method": "Kerberos" }
+        },
+        {
+          "step_index": 1,
+          "source_id": "device:dev-ws-101",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-app-01",
+          "properties": { "port": 443, "protocol": "TCP" }
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-app-01",
+          "relationship_type": "HOSTS",
+          "target_id": "app:app-erp-01",
+          "properties": { "service": "ERP_Web" }
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-benign-02",
+      "description": "Authorized IT Support administrator login to application server",
+      "evaluated_entity_id": "user:usr-102",
+      "ground_truth_label": "BENIGN_EXPECTED",
+      "expected_min_score": 0,
+      "expected_max_score": 15,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-102",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-102"
+        },
+        {
+          "step_index": 1,
+          "source_id": "user:usr-102",
+          "relationship_type": "HAS_PERMISSION",
+          "target_id": "server:srv-app-01",
+          "properties": { "privilege_level": "ADMINISTRATOR" }
+        },
+        {
+          "step_index": 2,
+          "source_id": "user:usr-102",
+          "relationship_type": "LOGGED_IN_TO",
+          "target_id": "server:srv-app-01",
+          "properties": { "logon_type": 10 }
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-benign-03",
+      "description": "DevOps Engineer authorized query to Postgres reporting application",
+      "evaluated_entity_id": "user:usr-103",
+      "ground_truth_label": "BENIGN_EXPECTED",
+      "expected_min_score": 0,
+      "expected_max_score": 15,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-103",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-103"
+        },
+        {
+          "step_index": 1,
+          "source_id": "user:usr-103",
+          "relationship_type": "HAS_PERMISSION",
+          "target_id": "server:srv-db-01",
+          "properties": { "privilege_level": "READ_ONLY" }
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-db-01",
+          "relationship_type": "HOSTS",
+          "target_id": "app:app-pg-01"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-benign-04",
+      "description": "Automated Backup Operator Service Principal snapshot of Active Directory root",
+      "evaluated_entity_id": "user:svc_backup@corporation.com",
+      "ground_truth_label": "BENIGN_EXPECTED",
+      "expected_min_score": 0,
+      "expected_max_score": 15,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:svc_backup@corporation.com",
+          "relationship_type": "HAS_PERMISSION",
+          "target_id": "server:srv-dc-01",
+          "properties": { "privilege_level": "BACKUP_OPERATOR" }
+        },
+        {
+          "step_index": 1,
+          "source_id": "server:srv-dc-01",
+          "relationship_type": "CONTAINS_CRITICAL_DATA",
+          "target_id": "critical:crit-ad-domain-root"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-new-legit-01",
+      "description": "New Finance Analyst (Evan Wright) onboarding and accessing ERP portal (Cold Start)",
+      "evaluated_entity_id": "user:usr-104",
+      "ground_truth_label": "UNOBSERVED_NEW_LEGITIMATE",
+      "expected_min_score": 20,
+      "expected_max_score": 35,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-104",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-104",
+          "properties": { "department": "Finance", "onboarding_date": "2026-10-15" }
+        },
+        {
+          "step_index": 1,
+          "source_id": "device:dev-ws-104",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-app-01",
+          "properties": { "port": 443, "protocol": "TCP" }
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-app-01",
+          "relationship_type": "HOSTS",
+          "target_id": "app:app-erp-01"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-new-legit-02",
+      "description": "Accounting Controller querying ERP application from financial workstation",
+      "evaluated_entity_id": "user:usr-201",
+      "ground_truth_label": "UNOBSERVED_NEW_LEGITIMATE",
+      "expected_min_score": 20,
+      "expected_max_score": 35,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-201",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-201"
+        },
+        {
+          "step_index": 1,
+          "source_id": "device:dev-ws-201",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-app-01",
+          "properties": { "port": 443, "protocol": "TCP" }
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-app-01",
+          "relationship_type": "HOSTS",
+          "target_id": "app:app-erp-01"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-policy-01",
+      "description": "Finance analyst workstation opening direct SQL connection to Database tier bypassing Application gateway",
+      "evaluated_entity_id": "user:usr-101",
+      "ground_truth_label": "POLICY_VIOLATION_UNAUTHORIZED",
+      "expected_min_score": 45,
+      "expected_max_score": 65,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-101",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-101"
+        },
+        {
+          "step_index": 1,
+          "source_id": "device:dev-ws-101",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-db-01",
+          "properties": { "port": 5432, "protocol": "TCP", "notes": "Direct client-to-database bypass" }
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-policy-02",
+      "description": "DevOps workstation opening direct RDP session to Domain Controller without authorization",
+      "evaluated_entity_id": "user:usr-103",
+      "ground_truth_label": "POLICY_VIOLATION_UNAUTHORIZED",
+      "expected_min_score": 50,
+      "expected_max_score": 70,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "user:usr-103",
+          "relationship_type": "USES",
+          "target_id": "device:dev-ws-103"
+        },
+        {
+          "step_index": 1,
+          "source_id": "device:dev-ws-103",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-dc-01",
+          "properties": { "port": 3389, "protocol": "TCP", "notes": "Unauthorized direct RDP into Domain Controller" }
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-policy-03",
+      "description": "Direct workstation-to-workstation lateral SMB traversal across client subnets",
+      "evaluated_entity_id": "device:dev-ws-101",
+      "ground_truth_label": "POLICY_VIOLATION_UNAUTHORIZED",
+      "expected_min_score": 40,
+      "expected_max_score": 60,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "device:dev-ws-101",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "device:dev-ws-102",
+          "properties": { "port": 445, "protocol": "SMB", "notes": "Peer-to-peer workstation lateral connection" }
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-suspicious-01",
+      "description": "Compromised workstation exploiting CVE-2024-21413 against app gateway to dump customer PII",
+      "evaluated_entity_id": "device:dev-ws-101",
+      "ground_truth_label": "SUSPICIOUS_ANOMALOUS",
+      "expected_min_score": 80,
+      "expected_max_score": 100,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "device:dev-ws-101",
+          "relationship_type": "POTENTIAL_EXPLOIT",
+          "target_id": "server:srv-app-01",
+          "properties": { "via_cve": "CVE-2024-21413", "attack_vector": "Moniker Link NTLM Relay" }
+        },
+        {
+          "step_index": 1,
+          "source_id": "server:srv-app-01",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-db-01",
+          "properties": { "port": 5432 }
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-db-01",
+          "relationship_type": "CONTAINS_CRITICAL_DATA",
+          "target_id": "critical:crit-pii-customer"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-suspicious-02",
+      "description": "Attacker abusing hijacked backup operator credentials from finance workstation to access domain root",
+      "evaluated_entity_id": "device:dev-ws-101",
+      "ground_truth_label": "SUSPICIOUS_ANOMALOUS",
+      "expected_min_score": 80,
+      "expected_max_score": 100,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "device:dev-ws-101",
+          "relationship_type": "LOGGED_IN_TO",
+          "target_id": "server:srv-dc-01",
+          "properties": { "hijacked_user": "user:svc_backup@corporation.com", "port": 389 }
+        },
+        {
+          "step_index": 1,
+          "source_id": "server:srv-dc-01",
+          "relationship_type": "CONTAINS_CRITICAL_DATA",
+          "target_id": "critical:crit-ad-domain-root"
+        }
+      ]
+    },
+    {
+      "sequence_id": "seq-suspicious-03",
+      "description": "Lateral leap through unpatched vulnerability to financial ledger vault",
+      "evaluated_entity_id": "device:dev-ws-102",
+      "ground_truth_label": "SUSPICIOUS_ANOMALOUS",
+      "expected_min_score": 80,
+      "expected_max_score": 100,
+      "steps": [
+        {
+          "step_index": 0,
+          "source_id": "device:dev-ws-102",
+          "relationship_type": "POTENTIAL_EXPLOIT",
+          "target_id": "server:srv-app-01",
+          "properties": { "via_cve": "CVE-2024-21413" }
+        },
+        {
+          "step_index": 1,
+          "source_id": "server:srv-app-01",
+          "relationship_type": "OBSERVED_CONNECTION",
+          "target_id": "server:srv-db-01"
+        },
+        {
+          "step_index": 2,
+          "source_id": "server:srv-db-01",
+          "relationship_type": "CONTAINS_CRITICAL_DATA",
+          "target_id": "critical:crit-db-financial"
+        }
+      ]
+    }
+  ]
+}
